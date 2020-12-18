@@ -22,12 +22,10 @@ class ClientSettings:
     EXIT_STRING = '/exit'
 
     # Chat Socket
-    HOST = '192.168.0.102'
-    PORT = 3001
     BUFFER_SIZE = 1024
-    ADDR = (HOST, PORT)
 
-    def __init__(self):
+    def __init__(self, host, port):
+        self.server_address = (host, port)
         self.sound_alert_preference = True
         self.notification_alert_preference = True
         self.app_background_color = BaseTheme['app_background_color']
@@ -94,6 +92,9 @@ class ClientSettings:
             self.message_submit_button_pad_y = 5
             self.message_list_border_dimension = 0
             self.message_submit_button_relief = 'flat'
+
+    def get_server_address(self):
+        return self.server_address
 
     def set_sound_alert_preference(self, state):
         self.sound_alert_preference = state
