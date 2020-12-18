@@ -5,6 +5,7 @@ import tkinter as tk
 import tkinter.font
 import os
 from PIL import ImageTk, Image
+from dotenv import load_dotenv
 from client_settings import ClientSettings
 from client_network import ClientNetwork
 from client_handlers import ClientHandlers
@@ -12,9 +13,9 @@ from meme_collection import MemeCollection
 
 
 class Wh00tClient(tk.Tk):
-    def __init__(self):
+    def __init__(self, server_address, server_port):
         super().__init__()
-        self.wh00t_client_settings = ClientSettings()
+        self.wh00t_client_settings = ClientSettings(server_address, server_port)
         self.wh00t_client_meme_collection = MemeCollection()
 
         # Declare window elements
@@ -124,4 +125,11 @@ class Wh00tClient(tk.Tk):
 
 
 if __name__ == '__main__':
-    Wh00tClient()
+    try:
+        load_dotenv()
+        SERVER_ADDRESS = os.getenv('SERVER_ADDRESS')
+        SERVER_PORT = int(os.getenv('SERVER_PORT'))
+        wh00t_client = Wh00tClient(SERVER_ADDRESS, SERVER_PORT)
+    except TypeError as type_error:
+        print('Received TypeError: Check that the .env project file is configured correctly')
+        exit()
