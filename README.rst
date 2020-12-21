@@ -9,8 +9,8 @@ Simple python LAN chat client app with emoji support
 
 Installation
 ------------
-This project is managed with Python Poetry (https://github.com/python-poetry/poetry). With Poetry installed correctly,
-simply clone this project and run::
+This project is managed with Python `Poetry <https://github.com/python-poetry/poetry>`_. With Poetry installed
+correctly, simply clone this project and run::
 
     poetry install
 
@@ -48,9 +48,43 @@ To run the script once the environment (.env) file is created, from within the w
 
     poetry run python wh00t_client/wh00t_client.py
 
+To exit the client, simply hit the close button on the client window, or type the exit command (``/exit``) into
+the message input field and hit send.
+
+Client Options
+----------------------
+
+keyboard mappings
+~~~~~~~~~~~~~~~~~~~
+When the message input field is selected, the following keyboard bindings are in affect:
+
+| ``UpKey`` : will allow you to go through your message history and select it for editing and resending
+| ``DownKey`` : will erase text currently in the message input field
+| ``PageUp`` and ``PageDown`` : scroll, in the input message box, through a subset of quick support emojis shortcodes
+| ``EscKey`` : print the ``exit_string`` command in the message input field
+
+emojis
+~~~~~~~
+A certain subset of emoji shortcodes are supported.  Emoji shortcodes can be researched at
+`emojipedia <https://emojipedia.org/shortcodes/>`_.  The following are examples of phrases with emoji shortcodes::
+
+    Hi there :smile:, How are you today?
+    Doing great, :thumbsup:
+    Hey, :thinking_face: I have a question for you...
+
+Which would produce::
+
+    Hi there 😄, how are you today?
+    Doing great, 👍
+    Hey, 🤔 I have a question for you...
+
+You can scroll, in the input message box, through a subset of quick support emoji shortcodes to inject into
+your messages by using the ``PageUp`` and ``PageDown`` keys on the keyboard.
+
 Commit Conventions
 ----------------------
-Git commit conventions follows Conventional Commits message conventions explained in detail on their website
-(https://www.conventionalcommits.org)
+Git commits follow `Conventional Commits <https://www.conventionalcommits.org>`_ message style as
+explained in detail on their website.
+
 
 
