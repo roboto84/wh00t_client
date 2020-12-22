@@ -5,7 +5,7 @@ wh00t_client
 Simple python LAN chat client app with emoji support
 
 .. image:: images/wh00t_client.png
-    :scale: 50
+    :scale: 100
 
 Installation
 ------------
@@ -54,6 +54,21 @@ the message input field and hit send.
 Client Options
 ----------------------
 
+commands
+~~~~~~~~~
+The client supports an array of commands that do not get sent over as a message, but instead
+gives the user feedback and help information.  The following commands can be used:
+
+| ``/help`` : prints this help summary
+| ``/sound`` : turn notification sounds on
+| ``/noSound`` : turn notification sounds off
+| ``/notify`` : turn notification toast on
+| ``/noNotification`` : turn notification toast off
+| ``/emojis`` : print list of top used emojis
+| ``/meme {memeName}`` : sends specific meme as a message. See /memes
+| ``/memes`` : prints out a list of available meme commands
+| ``/exit`` : exits program
+
 keyboard mappings
 ~~~~~~~~~~~~~~~~~~~
 When the message input field is selected, the following keyboard bindings are in affect:
@@ -62,6 +77,14 @@ When the message input field is selected, the following keyboard bindings are in
 | ``DownKey`` : will erase text currently in the message input field
 | ``PageUp`` and ``PageDown`` : scroll, in the input message box, through a subset of quick support emojis shortcodes
 | ``EscKey`` : print the ``exit_string`` command in the message input field
+
+message editing
+~~~~~~~~~~~~~~~~~
+The client supports an array of message editing options in order to enhance message context. The following options
+are available:
+
+| ``:emoji_shortcodes:`` : inline emoji shortcodes are supported
+| ``[message_in_brackets]`` : accentuates portion of message within brackets with a larger font and custom coloring
 
 emojis
 ~~~~~~~
