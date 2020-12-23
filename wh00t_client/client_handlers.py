@@ -47,7 +47,7 @@ class ClientHandlers:
             self.client_settings.linux_notify.uninit()
 
     def message_command_handler(self, message, number_of_messages, client_socket):
-        if message.find('{}'.format('/meme ')) >= 0:
+        if message.find('/meme ') >= 0:
             split_message = message.split('/meme', maxsplit=2)
             self.client_meme_collection.meme(client_socket, split_message[1].replace(' ', ''))
         elif message == '/noSound':
@@ -96,7 +96,7 @@ class ClientHandlers:
 
     def emoji_message_handler(self, message):
         self.set_emoji_sentence_lock(False)
-        self.chat_message.set('{}{}'.format(self.message_cache, message))
+        self.chat_message.set(f'{self.message_cache}{message}')
         self.message_input_field.icursor(len(self.chat_message.get()))
 
     def set_emoji_sentence_lock(self, lock_state):
@@ -175,12 +175,12 @@ class ClientHandlers:
         self.message_list.see('end')
 
         if (message_type != 'local') and (
-                message.find('| {} ({}) |'.format(self.user_handle, self.client_settings.message_time())) < 0):
+                message.find(f'| {self.user_handle} ({self.client_settings.message_time()}) |') < 0):
             if self.client_settings.get_sound_alert_preference():
                 self.client_settings.set_sound_alert_preference(False)
                 sound_delayed_action = Timer(5.0, self.client_settings.set_sound_alert_preference, [True])
                 sound_delayed_action.start()
-                if message.find('{}'.format(self.client_settings.ALERT_COMMAND)) < 0:
+                if message.find(f'{self.client_settings.ALERT_COMMAND}') < 0:
                     playsound(self.client_settings.MESSAGE_SOUND)
                 else:
                     playsound(self.client_settings.USER_ALERT_SOUND)
@@ -200,5 +200,5 @@ class ClientHandlers:
     def print_help():
         client_help = '\n'
         for item in HelpMenu:
-            client_help += '\n     {}'.format(item)
+            client_help += f'\n     {item}'
         return client_help
