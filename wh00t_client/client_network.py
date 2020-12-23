@@ -18,10 +18,10 @@ class ClientNetwork:
     def sock_it(self):
         try:
             address = self.client_settings.get_server_address()
-            print('Attempting socket connection to {}'.format(address))
+            print(f'Attempting socket connection to {address}')
             self.client_socket = socket(AF_INET, SOCK_STREAM)
             self.client_socket.connect(address)
-            print('Connection to {} has succeeded'.format(address))
+            print(f'Connection to {address} has succeeded')
         except ConnectionRefusedError as e:
             print("Received ConnectionRefusedError: ", e)
             os._exit(1)

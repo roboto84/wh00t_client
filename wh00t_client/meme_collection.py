@@ -7,7 +7,7 @@ from bin.help import HelpMeme
 
 class MemeCollection:
     def meme(self, client_socket, meme_type):
-        ascii_array = ['meme type "{}" not recognized'.format(meme_type)]
+        ascii_array = [f'meme type "{meme_type}" not recognized']
 
         if meme_type == 'wise':
             ascii_array = self.wise_ascii()
@@ -34,14 +34,14 @@ class MemeCollection:
     def print_emojis_help():
         emoji_help = '\n'
         for item in Emojis:
-            emoji_help += '\n     {}  {}'.format(Emojis[item], item)
+            emoji_help += f'\n     {Emojis[item]}  {item}'
         return emoji_help
 
     @staticmethod
     def print_memes_help():
         client_memes = '\n'
         for item in HelpMeme:
-            client_memes += '\n     {}'.format(item)
+            client_memes += f'\n     {item}'
         return client_memes
 
     @staticmethod

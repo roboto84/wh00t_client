@@ -19,9 +19,8 @@ class Wh00tClient(tk.Tk):
         self.wh00t_client_meme_collection = MemeCollection()
 
         # Declare window elements
-        self.geometry(
-            '{}x{}'.format(self.wh00t_client_settings.app_dimensions['width'],
-                           self.wh00t_client_settings.app_dimensions['height']))
+        self.geometry('{}x{}'.format(self.wh00t_client_settings.app_dimensions['width'],
+                                     self.wh00t_client_settings.app_dimensions['height']))
         self.resizable(height=False, width=False)
         self['bg'] = self.wh00t_client_settings.app_background_color
 
