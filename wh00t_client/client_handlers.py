@@ -9,7 +9,11 @@ from bin.help import HelpMenu
 
 
 class ClientHandlers:
-    def __init__(self, client_settings, client_meme_collection, chat_message, message_input_field, message_list):
+    def __init__(self, logging_object, client_settings, client_meme_collection, chat_message,
+                 message_input_field, message_list):
+        self.logger = logging_object.getLogger(type(self).__name__)
+        self.logger.setLevel(logging_object.INFO)
+
         self.chat_message = chat_message
         self.message_input_field = message_input_field
         self.client_settings = client_settings
@@ -68,9 +72,8 @@ class ClientHandlers:
             self.message_list_push('\nCommand not recognized, type /help for list of supported commands', 'local',
                                    number_of_messages)
 
-    @staticmethod
-    def message_list_event_handler(event):
-        # print(event) # Debug keys
+    def message_list_event_handler(self, event):
+        self.logger.debug(str(event))
         if event.keycode == 67 and event.keysym == 'c':  # Windows
             return
         elif event.char and event.char == '\x03' and event.keycode == 54 and event.keysym == 'c':  # Linux
@@ -103,7 +106,7 @@ class ClientHandlers:
         self.emoji_sentence_lock = lock_state
 
     def message_entry_event_handler(self, event):
-        # print(event) # Debug keys
+        self.logger.debug(str(event))
         if event.keysym == 'Escape':
             if self.emoji_sentence_lock:
                 self.chat_message.set(self.message_cache)

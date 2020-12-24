@@ -6,7 +6,10 @@ from socket import AF_INET, socket, SOCK_STREAM
 
 
 class ClientNetwork:
-    def __init__(self, chat_client_settings, chat_message, chat_client_handlers):
+    def __init__(self, logging_object, chat_client_settings, chat_message, chat_client_handlers):
+        self.logger = logging_object.getLogger(type(self).__name__)
+        self.logger.setLevel(logging_object.INFO)
+
         self.client_settings = chat_client_settings
         self.chat_message = chat_message
         self.chat_client_handlers = chat_client_handlers
@@ -18,15 +21,15 @@ class ClientNetwork:
     def sock_it(self):
         try:
             address = self.client_settings.get_server_address()
-            print(f'Attempting socket connection to {address}')
+            self.logger.info(f'Attempting socket connection to {address}')
             self.client_socket = socket(AF_INET, SOCK_STREAM)
             self.client_socket.connect(address)
-            print(f'Connection to {address} has succeeded')
-        except ConnectionRefusedError as e:
-            print("Received ConnectionRefusedError: ", e)
+            self.logger.info(f'Connection to {address} has succeeded')
+        except ConnectionRefusedError as connection_refused_error:
+            self.logger.error(f'Received ConnectionRefusedError: {(str(connection_refused_error))}')
             os._exit(1)
-        except OSError as e:  # Possibly client has left the chat.
-            print("Received OSError: ", e)
+        except OSError as os_error:  # Possibly client has left the chat.
+            self.logger.error(f'Received an OSError: {(str(os_error))}')
             os._exit(1)
 
     def send_message(self, close_app):
@@ -48,7 +51,7 @@ class ClientNetwork:
                     if message == self.client_settings.EXIT_STRING:
                         close_app()
             except IOError as io_error:
-                print("Received IOError: ", io_error)
+                self.logger.error(f'Received IOError: {(str(io_error))}')
                 self.chat_client_handlers.message_list_push('\nDetected remote server disconnect. \
                                     \nShutting down client on next input, check server please.', 'local',
                                                             self.number_of_messages)
@@ -64,5 +67,6 @@ class ClientNetwork:
                     break
                 else:
                     self.chat_client_handlers.message_list_push(emoji_message, 'network', self.number_of_messages)
-            except OSError:  # Possibly client has left the chat.
+            except OSError as os_error:  # Possibly client has left the chat.
+                self.logger.error(f'Received OSError: {(str(os_error))}')
                 break
