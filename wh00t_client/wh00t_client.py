@@ -4,6 +4,8 @@
 import tkinter as tk
 import tkinter.font
 import os
+import ntpath
+import logging.config
 from PIL import ImageTk, Image
 from dotenv import load_dotenv
 from client_settings import ClientSettings
@@ -13,7 +15,7 @@ from meme_collection import MemeCollection
 
 
 class Wh00tClient(tk.Tk):
-    def __init__(self, server_address, server_port):
+    def __init__(self, logging_object, server_address, server_port):
         super().__init__()
         self.wh00t_client_settings = ClientSettings(server_address, server_port)
         self.wh00t_client_meme_collection = MemeCollection()
@@ -80,9 +82,10 @@ class Wh00tClient(tk.Tk):
                                              highlightbackground=self.wh00t_client_settings.highlight_background_color,
                                              highlightcolor=self.wh00t_client_settings.highlight_color)
 
-        self.wh00t_client_handlers = ClientHandlers(self.wh00t_client_settings, self.wh00t_client_meme_collection,
-                                                    chat_message, message_input_field, message_list)
-        self.wh00t_client_network = ClientNetwork(self.wh00t_client_settings, chat_message,
+        self.wh00t_client_handlers = ClientHandlers(logging_object, self.wh00t_client_settings,
+                                                    self.wh00t_client_meme_collection, chat_message,
+                                                    message_input_field, message_list)
+        self.wh00t_client_network = ClientNetwork(logging_object, self.wh00t_client_settings, chat_message,
                                                   self.wh00t_client_handlers)
 
         # Set initial element properties.
@@ -124,11 +127,16 @@ class Wh00tClient(tk.Tk):
 
 
 if __name__ == '__main__':
+    HOME_PATH = ntpath.dirname(__file__)
+    logging.config.fileConfig(fname=os.path.join(HOME_PATH, 'bin/logging.conf'), disable_existing_loggers=False)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+
     try:
         load_dotenv()
         SERVER_ADDRESS = os.getenv('SERVER_ADDRESS')
         SERVER_PORT = int(os.getenv('SERVER_PORT'))
-        wh00t_client = Wh00tClient(SERVER_ADDRESS, SERVER_PORT)
+        wh00t_client = Wh00tClient(logging, SERVER_ADDRESS, SERVER_PORT)
     except TypeError as type_error:
-        print('Received TypeError: Check that the .env project file is configured correctly')
+        logger.error('Received TypeError: Check that the .env project file is configured correctly')
         exit()
