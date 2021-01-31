@@ -15,9 +15,9 @@ from meme_collection import MemeCollection
 
 
 class Wh00tClient(tk.Tk):
-    def __init__(self, logging_object, server_address, server_port):
+    def __init__(self, logging_object, client_user_name, server_address, server_port):
         super().__init__()
-        self.wh00t_client_settings = ClientSettings(server_address, server_port)
+        self.wh00t_client_settings = ClientSettings(client_user_name, server_address, server_port)
         self.wh00t_client_meme_collection = MemeCollection()
 
         # Declare window elements
@@ -134,9 +134,10 @@ if __name__ == '__main__':
 
     try:
         load_dotenv()
+        CLIENT_USER_NAME = os.getenv('CLIENT_USER_NAME')
         SERVER_ADDRESS = os.getenv('SERVER_ADDRESS')
         SERVER_PORT = int(os.getenv('SERVER_PORT'))
-        wh00t_client = Wh00tClient(logging, SERVER_ADDRESS, SERVER_PORT)
+        wh00t_client = Wh00tClient(logging, CLIENT_USER_NAME, SERVER_ADDRESS, SERVER_PORT)
     except TypeError as type_error:
         logger.error('Received TypeError: Check that the .env project file is configured correctly')
         exit()
