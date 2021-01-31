@@ -2,6 +2,9 @@
 
 import os
 import emoji
+import time
+import ast
+from datetime import datetime
 from socket import AF_INET, socket, SOCK_STREAM
 
 
@@ -24,6 +27,8 @@ class ClientNetwork:
             self.logger.info(f'Attempting socket connection to {address}')
             self.client_socket = socket(AF_INET, SOCK_STREAM)
             self.client_socket.connect(address)
+            package = self.package_data(self.client_settings.client_id, self.client_settings.CLIENT_PROFILE, '')
+            self.client_socket.send(bytes(package, 'utf8'))
             self.logger.info(f'Connection to {address} has succeeded')
         except ConnectionRefusedError as connection_refused_error:
             self.logger.error(f'Received ConnectionRefusedError: {(str(connection_refused_error))}')
@@ -44,15 +49,18 @@ class ClientNetwork:
                 elif ((len(message) != 0) and (message != self.client_settings.EXIT_STRING) and
                       (message != self.client_settings.ALERT_COMMAND) and (message[0] == '/') and (
                               message.count('/') == 1)):
-                    self.chat_client_handlers.message_command_handler(message, self.number_of_messages,
-                                                                      self.client_socket)
+                    self.chat_client_handlers.message_command_handler(message, self.client_socket)
                 else:
-                    self.client_socket.send(bytes(message, 'utf8'))
+                    package = self.package_data(self.client_settings.client_id,
+                                                self.client_settings.CLIENT_PROFILE, message)
+                    self.client_socket.send(bytes(package, 'utf8'))
                     if message == self.client_settings.EXIT_STRING:
                         close_app()
             except IOError as io_error:
                 self.logger.error(f'Received IOError: {(str(io_error))}')
-                self.chat_client_handlers.message_list_push('\nDetected remote server disconnect. \
+                self.chat_client_handlers.message_list_push(self.client_settings.client_id,
+                                                            self.client_settings.CLIENT_PROFILE,
+                                                            '\nDetected remote server disconnect. \
                                     \nShutting down client on next input, check server please.', 'local',
                                                             self.number_of_messages)
                 self.client_socket_error = True
@@ -60,13 +68,28 @@ class ClientNetwork:
     def receive(self):
         while True:
             try:
-                message = self.client_socket.recv(self.client_settings.BUFFER_SIZE).decode('utf8', errors='replace')
-                emoji_message = emoji.emojize(message, use_aliases=True)
+                message = self.client_socket.recv(self.client_settings.BUFFER_SIZE)
+                package: dict = ast.literal_eval(message.decode('utf8', errors='replace'))
+                emoji_message = emoji.emojize(package['message'], use_aliases=True)
                 self.number_of_messages += 1
                 if emoji_message == self.client_settings.EXIT_STRING:
                     break
                 else:
-                    self.chat_client_handlers.message_list_push(emoji_message, 'network', self.number_of_messages)
+                    self.chat_client_handlers.message_list_push(package['id'], package['profile'], package['time'],
+                                                                emoji_message, 'network')
             except OSError as os_error:  # Possibly client has left the chat.
                 self.logger.error(f'Received OSError: {(str(os_error))}')
                 break
+            except SyntaxError as syntax_error:
+                self.logger.error(f'Received SyntaxError: {str(syntax_error)}')
+                break
+
+    @staticmethod
+    def package_data(app_id, app_profile, message) -> str:
+        data_dict: dict = {
+            'id': app_id,
+            'profile': app_profile,
+            'time': datetime.fromtimestamp(time.time()).strftime('%m/%d %H:%M'),
+            'message': message
+        }
+        return str(data_dict)

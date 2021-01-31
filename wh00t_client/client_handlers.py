@@ -23,7 +23,7 @@ class ClientHandlers:
         self.emoji_sentence_lock = False
         self.message_list_message_history = []
         self.message_history_index = 0
-        self.user_handle = ''
+        self.user_handle = self.client_settings.client_id
         self.emoji_dict_keys = list(Emojis.keys())
         self.emoji_paging_index = 0
         self.receive_thread = None
@@ -42,15 +42,15 @@ class ClientHandlers:
                                         foreground=client_settings.other_user_handles_color)
         self.message_list.tag_configure('System', font=general_font, foreground=client_settings.system_color)
 
-    def thread_it(self, receive):
-        self.receive_thread = Thread(target=receive)
+    def thread_it(self, socket_receive):
+        self.receive_thread = Thread(target=socket_receive)
         self.receive_thread.start()
 
     def close_notify(self):
         if self.client_settings.get_current_platform() == 'Linux':
             self.client_settings.linux_notify.uninit()
 
-    def message_command_handler(self, message, number_of_messages, client_socket):
+    def message_command_handler(self, message, client_socket):
         if message.find('/meme ') >= 0:
             split_message = message.split('/meme', maxsplit=2)
             self.client_meme_collection.meme(client_socket, split_message[1].replace(' ', ''))
@@ -63,14 +63,16 @@ class ClientHandlers:
         elif message == '/notify':
             self.client_settings.set_notification_alert_preference(True)
         elif message == '/help':
-            self.message_list_push(self.print_help(), 'local', number_of_messages)
+            self.message_list_push('wh00t', 'app', self.client_settings.message_time(), self.print_help(), 'local')
         elif message == '/memes':
-            self.message_list_push(self.client_meme_collection.print_memes_help(), 'local', number_of_messages)
+            self.message_list_push('wh00t', 'app', self.client_settings.message_time(),
+                                   self.client_meme_collection.print_memes_help(), 'local')
         elif message == '/emojis':
-            self.message_list_push(self.client_meme_collection.print_emojis_help(), 'local', number_of_messages)
+            self.message_list_push('wh00t', 'app', self.client_settings.message_time(),
+                                   self.client_meme_collection.print_emojis_help(), 'local')
         else:
-            self.message_list_push('\nCommand not recognized, type /help for list of supported commands', 'local',
-                                   number_of_messages)
+            self.message_list_push('wh00t', 'app', self.client_settings.message_time(),
+                                   '\nCommand not recognized, type /help for list of supported commands', 'local')
 
     def message_list_event_handler(self, event):
         self.logger.debug(str(event))
@@ -164,12 +166,11 @@ class ClientHandlers:
                 self.message_list.tag_remove(remove_tag_name, 'matchStart', 'matchEnd')
             self.message_list.tag_add(tag_name, 'matchStart', 'matchEnd')
 
-    def message_list_push(self, message, message_type, number_of_messages):
-        if number_of_messages == 1:
-            split_message = message.split()
-            self.user_handle = split_message[8].replace('.', '')
-
-        self.message_list.insert(tkinter.END, message)
+    def message_list_push(self, client_id, client_profile, message_time, message, message_type):
+        formatted_message = f'| {client_id} ({message_time}) | {message}\n'
+        if client_profile == 'app':
+            formatted_message = f'{message}\n'
+        self.message_list.insert(tkinter.END, formatted_message)
         self.tag_custom_font('Emoji', r'[\u263a-\U0001f645]')
         self.tag_custom_font('Brackets', r'\[.*\]')
         self.tag_custom_font('OtherUsersHandle', r'\|.*\|')
@@ -177,8 +178,7 @@ class ClientHandlers:
         self.tag_custom_font('System', r'\~.*\~')
         self.message_list.see('end')
 
-        if (message_type != 'local') and (
-                message.find(f'| {self.user_handle} ({self.client_settings.message_time()}) |') < 0):
+        if (message_type != 'local') and (formatted_message.find(f'| {self.user_handle} ({message_time}) |') < 0):
             if self.client_settings.get_sound_alert_preference():
                 self.client_settings.set_sound_alert_preference(False)
                 sound_delayed_action = Timer(5.0, self.client_settings.set_sound_alert_preference, [True])

@@ -20,11 +20,13 @@ class ClientSettings:
     USER_ALERT_SOUND = os.path.join(HOME_PATH, 'assets/audio/AORiver.wav')
     ALERT_COMMAND = '/ao'
     EXIT_STRING = '/exit'
+    CLIENT_PROFILE = 'user'
 
     # Chat Socket
     BUFFER_SIZE = 1024
 
-    def __init__(self, host, port):
+    def __init__(self, client_user_name, host, port):
+        self.client_id = client_user_name
         self.server_address = (host, port)
         self.sound_alert_preference = True
         self.notification_alert_preference = True
