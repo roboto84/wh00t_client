@@ -2,6 +2,7 @@
 
 import tkinter
 import tkinter.font
+from typing import Optional, List
 from threading import Thread, Timer
 from playsound import playsound
 from bin.emojis import Emojis
@@ -50,10 +51,10 @@ class ClientHandlers:
         if self.client_settings.get_current_platform() == 'Linux':
             self.client_settings.linux_notify.uninit()
 
-    def message_command_handler(self, message, client_socket):
+    def message_command_handler(self, message) -> Optional[List[str]]:
         if message.find('/meme ') >= 0:
             split_message = message.split('/meme', maxsplit=2)
-            self.client_meme_collection.meme(client_socket, split_message[1].replace(' ', ''))
+            return self.client_meme_collection.meme(split_message[1].replace(' ', ''))
         elif message == '/noSound':
             self.client_settings.set_sound_alert_preference(False)
         elif message == '/sound':
@@ -62,17 +63,21 @@ class ClientHandlers:
             self.client_settings.set_notification_alert_preference(False)
         elif message == '/notify':
             self.client_settings.set_notification_alert_preference(True)
+        elif message == '/version':
+            self.message_list_push('wh00t', 'app', 'internal_message', self.client_settings.message_time(),
+                                   f'\n     wh00t client v{self.client_settings.CLIENT_VERSION}\n', 'local')
         elif message == '/help':
-            self.message_list_push('wh00t', 'app', self.client_settings.message_time(), self.print_help(), 'local')
+            self.message_list_push('wh00t', 'app', 'internal_message', self.client_settings.message_time(),
+                                   self.print_help(), 'local')
         elif message == '/memes':
-            self.message_list_push('wh00t', 'app', self.client_settings.message_time(),
+            self.message_list_push('wh00t', 'app', 'internal_message', self.client_settings.message_time(),
                                    self.client_meme_collection.print_memes_help(), 'local')
         elif message == '/emojis':
-            self.message_list_push('wh00t', 'app', self.client_settings.message_time(),
+            self.message_list_push('wh00t', 'app', 'internal_message', self.client_settings.message_time(),
                                    self.client_meme_collection.print_emojis_help(), 'local')
         else:
-            self.message_list_push('wh00t', 'app', self.client_settings.message_time(),
-                                   '\nCommand not recognized, type /help for list of supported commands', 'local')
+            self.message_list_push('wh00t', 'app', 'internal_message', self.client_settings.message_time(),
+                                   '\nCommand not recognized, type /help for list of supported commands\n', 'local')
 
     def message_list_event_handler(self, event):
         self.logger.debug(str(event))
@@ -83,31 +88,31 @@ class ClientHandlers:
         else:
             return 'break'
 
-    def message_history_handler(self, message):
+    def message_history_handler(self, message) -> None:
         self.message_list_message_history.append(message)
         if len(self.message_list_message_history) > 10:
             del self.message_list_message_history[0]
         self.message_history_index = len(self.message_list_message_history) - 1
         self.chat_message.set('')
 
-    def emoji_message_cache(self):
+    def emoji_message_cache(self) -> None:
         if not self.emoji_sentence_lock and (self.chat_message.get() not in self.emoji_dict_keys):
             self.set_emoji_sentence_lock(True)
             self.message_cache = self.chat_message.get()
 
-    def emoji_message_cache_check_not_empty(self):
+    def emoji_message_cache_check_not_empty(self) -> None:
         if not self.message_cache.replace(' ', ''):
             self.set_emoji_sentence_lock(False)
 
-    def emoji_message_handler(self, message):
+    def emoji_message_handler(self, message) -> None:
         self.set_emoji_sentence_lock(False)
         self.chat_message.set(f'{self.message_cache}{message}')
         self.message_input_field.icursor(len(self.chat_message.get()))
 
-    def set_emoji_sentence_lock(self, lock_state):
+    def set_emoji_sentence_lock(self, lock_state) -> None:
         self.emoji_sentence_lock = lock_state
 
-    def message_entry_event_handler(self, event):
+    def message_entry_event_handler(self, event) -> None:
         self.logger.debug(str(event))
         if event.keysym == 'Escape':
             if self.emoji_sentence_lock:
@@ -147,7 +152,7 @@ class ClientHandlers:
             self.message_input_field.select_range(0, 'end')
         return
 
-    def tag_custom_font(self, tag_name, regex, remove_tag_name=None, remove_tag_first=False):
+    def tag_custom_font(self, tag_name, regex, remove_tag_name=None, remove_tag_first=False) -> None:
         self.message_list.tag_remove(tag_name, '1.0', 'end')
 
         count = tkinter.IntVar()
@@ -166,7 +171,8 @@ class ClientHandlers:
                 self.message_list.tag_remove(remove_tag_name, 'matchStart', 'matchEnd')
             self.message_list.tag_add(tag_name, 'matchStart', 'matchEnd')
 
-    def message_list_push(self, client_id, client_profile, message_time, message, message_type):
+    def message_list_push(self, client_id, client_profile, client_category,
+                          message_time, message, message_type) -> None:
         formatted_message = f'| {client_id} ({message_time}) | {message}\n'
         if client_profile == 'app':
             formatted_message = f'{message}\n'
@@ -200,8 +206,8 @@ class ClientHandlers:
                     lin_notify.show()
 
     @staticmethod
-    def print_help():
+    def print_help() -> str:
         client_help = '\n'
         for item in HelpMenu:
             client_help += f'\n     {item}'
-        return client_help
+        return f'{client_help}\n'

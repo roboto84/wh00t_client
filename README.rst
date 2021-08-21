@@ -9,8 +9,13 @@ Simple python LAN chat client app with emoji support
 
 Installation
 ------------
-This project is managed with Python `Poetry <https://github.com/python-poetry/poetry>`_. With Poetry installed
-correctly, simply clone this project and run::
+
+Libraries needed for Linux (tested on Fedora 34)::
+
+    sudo dnf install cairo-devel pkg-config python3-devel gobject-introspection-devel libjpeg-devel openjpeg2-devel cairo-gobject-devel python3-tkinter
+
+This project is managed with Python `Poetry <https://github.com/python-poetry/poetry>`_. With Poetry installed, simply
+clone this project and run::
 
     poetry install
 
@@ -29,22 +34,25 @@ wh00t_client.py
 ~~~~~~~~~~~~~~~~~~~~~~
 This process functions as the wh00t chat client. wh00t_client.py requires that an ``.env`` file is available
 in the *same* directory it is running under. The format of the .env file should contain ``SERVER_ADDRESS``, and
-``SERVER_PORT`` as defined environmental variables.
+``SERVER_PORT``, ``CLIENT_USER_NAME`` as defined environmental variables.
 
+| ``CLIENT_USER_NAME`` : Your chosen username
 | ``SERVER_ADDRESS`` : The chat server address
 | ``SERVER_PORT`` : The port the chat server is listening on
 
 An explained ``.env`` file format is shown below::
 
+    CLIENT_USER_NAME=ChillHopper
     SERVER_ADDRESS=<Server address>
     SERVER_PORT=<Server port>
 
 A typical ``.env`` file may look like this::
 
+    CLIENT_USER_NAME=ChillHopper
     SERVER_ADDRESS=192.168.0.102
     SERVER_PORT=3001
 
-To run the script once the environment (.env) file is created, from within the wh00t_server directory, simply type::
+To run the script once the environment (.env) file is created, from within the wh00t_client directory, simply type::
 
     poetry run python wh00t_client/wh00t_client.py
 
@@ -60,6 +68,7 @@ The client supports an array of commands that do not get sent over as a message,
 gives the user feedback and help information.  The following commands can be used:
 
 | ``/help`` : prints this help summary
+| ``/version`` : outputs wh00t client version
 | ``/sound`` : turn notification sounds on
 | ``/noSound`` : turn notification sounds off
 | ``/notify`` : turn notification toast on
@@ -108,6 +117,3 @@ Commit Conventions
 ----------------------
 Git commits follow `Conventional Commits <https://www.conventionalcommits.org>`_ message style as
 explained in detail on their website.
-
-
-

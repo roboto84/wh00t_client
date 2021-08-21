@@ -1,17 +1,15 @@
 # Meme Collection base class
 
-import time
+from typing import List
 from bin.emojis import Emojis
 from bin.help import HelpMeme
 
 
 class MemeCollection:
-    def meme(self, client_socket, meme_type):
-        ascii_array = [f'meme type "{meme_type}" not recognized']
-
-        if meme_type == 'wise':
-            ascii_array = self.wise_ascii()
-        elif meme_type == 'tableFlip':
+    def meme(self, meme_type) -> List[str]:
+        ascii_array: List[str] = [f':face_with_raised_eyebrow: Sorry, '
+                                  f'meme type "{meme_type}" doesn\'t exist.']
+        if meme_type == 'tableFlip':
             ascii_array = self.table_flip_ascii()
         elif meme_type == 'hurry':
             ascii_array = self.hurry_ascii()
@@ -25,57 +23,48 @@ class MemeCollection:
             ascii_array = self.kitty_ascii()
         elif meme_type == 'luv':
             ascii_array = self.luv_ascii()
-
-        for artLine in ascii_array:
-            client_socket.send(bytes(artLine, 'utf8'))
-            time.sleep(.025)
+        return ascii_array
 
     @staticmethod
-    def print_emojis_help():
-        emoji_help = '\n'
+    def print_emojis_help() -> str:
+        emoji_help: str = '\n'
         for item in Emojis:
             emoji_help += f'\n     {Emojis[item]}  {item}'
-        return emoji_help
+        return f'{emoji_help}\n'
 
     @staticmethod
-    def print_memes_help():
-        client_memes = '\n'
+    def print_memes_help() -> str:
+        client_memes: str = '\n'
         for item in HelpMeme:
             client_memes += f'\n     {item}'
-        return client_memes
+        return f'{client_memes}\n'
 
     @staticmethod
-    def wise_ascii():
-        return ["         {o,o}",
-                "         |)__)",
-                "          -\"-\"-"]
-
-    @staticmethod
-    def table_flip_ascii():
+    def table_flip_ascii() -> List[str]:
         return ["        (ノ ゜Д゜)ノ ︵ ┻━┻"]
 
     @staticmethod
-    def hurry_ascii():
+    def hurry_ascii() -> List[str]:
         return ["       ─=≡Σ((( つ◕ل͜◕)つ"]
 
     @staticmethod
-    def bye_ascii():
+    def bye_ascii() -> List[str]:
         return ["       (ʘ‿ʘ)╯"]
 
     @staticmethod
-    def hug_ascii():
+    def hug_ascii() -> List[str]:
         return ["       (づ｡◕‿‿◕｡)づ"]
 
     @staticmethod
-    def shrug_ascii():
+    def shrug_ascii() -> List[str]:
         return ["       ¯\_(ツ)_/¯"]
 
     @staticmethod
-    def kitty_ascii():
+    def kitty_ascii() -> List[str]:
         return ["       =^_^="]
 
     @staticmethod
-    def luv_ascii():
+    def luv_ascii() -> List[str]:
         return ["                  ▄▀▀▀▄▄▄▄▄▄▄▀▀▀▄",
                 "                  █▒▒░░░░░░░░░▒▒█",
                 "                     █░░█░░░░░█░░█     LUVS YOU",

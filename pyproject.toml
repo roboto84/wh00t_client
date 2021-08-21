@@ -1,7 +1,7 @@
 [tool.poetry]
 name = 'wh00t_client'
-version = '0.1.0'
-description = ''
+version = '1.0.0'
+description = 'Simple python LAN chat client that works with the wh00t chat server'
 authors = ['roboto84 <7658704+roboto84@users.noreply.github.com>']
 
 [tool.poetry.dependencies]
@@ -12,6 +12,7 @@ emoji = '^0.6.0'
 playsound = '^1.2.2'
 PyGObject = [{ version = '^3.36.1', platform = 'linux' }]
 win10toast = [{ version = '^0.9', platform = 'windows' }]
+wh00t-core = {git = 'https://github.com/roboto84/wh00t_core.git', tag = 'v0.1.0'}
 
 [tool.poetry.dev-dependencies]
 pytest = '^5.2'

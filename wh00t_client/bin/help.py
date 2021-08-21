@@ -2,6 +2,7 @@
 
 HelpMenu = [
     '/help - prints this help summary',
+    '/version - prints out wh00t client version',
     '/sound - turn notification sounds on',
     '/noSound - turn notification sounds off',
     '/notify - turn notification toast on',
@@ -13,7 +14,6 @@ HelpMenu = [
 
 HelpMeme = [
     '/meme luv - prints luv bear meme',
-    '/meme wise - prints ascii owl',
     '/meme tableFlip - prints ascii table flip',
     '/meme hurry - prints hurry flying ascii',
     '/meme bye - prints ascii bye dude',
