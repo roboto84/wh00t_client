@@ -25,7 +25,7 @@ class Wh00tClientNetwork(ClientNetwork):
         super().__init__(address[0], address[1], self.client_settings.client_id,
                          self.client_settings.CLIENT_PROFILE, self.logging_object)
 
-    def send_wh00t_message(self, close_app: Callable):
+    def send_wh00t_message(self, close_app: Callable[[], None]):
         if self.client_socket_error:
             os._exit(1)
         else:
@@ -59,14 +59,14 @@ class Wh00tClientNetwork(ClientNetwork):
                 )
                 self.client_socket_error = True
 
-    def multi_wh00t_message(self, client_category, ascii_array: List[str]):
+    def multi_wh00t_message(self, client_category: str, ascii_array: List[str]):
         try:
             for artLine in ascii_array:
                 super().send_message(client_category, artLine)
         except TypeError as type_error:
             self.logger.error(f'Received IOError: {(str(type_error))}')
 
-    def receive_wh00t_message(self):
+    def receive_wh00t_message(self) -> None:
         try:
             super().receive(self.received_message_handler)
         except SyntaxError as syntax_error:
@@ -78,7 +78,7 @@ class Wh00tClientNetwork(ClientNetwork):
                                                         '\nReceived unsupported characters in message',
                                                         'local')
 
-    def received_message_handler(self, package) -> bool:
+    def received_message_handler(self, package: dict) -> bool:
         if package['message'] == self.client_settings.EXIT_STRING:
             return False
         else:

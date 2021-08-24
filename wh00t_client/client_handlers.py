@@ -1,8 +1,8 @@
 # Chat Client Handlers base class
-
+import logging
 import tkinter
 import tkinter.font
-from typing import Optional, List
+from typing import Optional, List, Callable
 from threading import Thread, Timer
 from playsound import playsound
 from bin.emojis import Emojis
@@ -12,7 +12,7 @@ from bin.help import HelpMenu
 class ClientHandlers:
     def __init__(self, logging_object, client_settings, client_meme_collection, chat_message,
                  message_input_field, message_list):
-        self.logger = logging_object.getLogger(type(self).__name__)
+        self.logger: logging.Logger = logging_object.getLogger(type(self).__name__)
         self.logger.setLevel(logging_object.INFO)
 
         self.chat_message = chat_message
@@ -43,7 +43,7 @@ class ClientHandlers:
                                         foreground=client_settings.other_user_handles_color)
         self.message_list.tag_configure('System', font=general_font, foreground=client_settings.system_color)
 
-    def thread_it(self, socket_receive):
+    def thread_it(self, socket_receive: Callable[[], None]):
         self.receive_thread = Thread(target=socket_receive)
         self.receive_thread.start()
 
@@ -51,7 +51,7 @@ class ClientHandlers:
         if self.client_settings.get_current_platform() == 'Linux':
             self.client_settings.linux_notify.uninit()
 
-    def message_command_handler(self, message) -> Optional[List[str]]:
+    def message_command_handler(self, message: str) -> Optional[List[str]]:
         if message.find('/meme ') >= 0:
             split_message = message.split('/meme', maxsplit=2)
             return self.client_meme_collection.meme(split_message[1].replace(' ', ''))
@@ -88,7 +88,7 @@ class ClientHandlers:
         else:
             return 'break'
 
-    def message_history_handler(self, message) -> None:
+    def message_history_handler(self, message: str) -> None:
         self.message_list_message_history.append(message)
         if len(self.message_list_message_history) > 10:
             del self.message_list_message_history[0]
@@ -104,12 +104,12 @@ class ClientHandlers:
         if not self.message_cache.replace(' ', ''):
             self.set_emoji_sentence_lock(False)
 
-    def emoji_message_handler(self, message) -> None:
+    def emoji_message_handler(self, message: str) -> None:
         self.set_emoji_sentence_lock(False)
         self.chat_message.set(f'{self.message_cache}{message}')
         self.message_input_field.icursor(len(self.chat_message.get()))
 
-    def set_emoji_sentence_lock(self, lock_state) -> None:
+    def set_emoji_sentence_lock(self, lock_state: bool) -> None:
         self.emoji_sentence_lock = lock_state
 
     def message_entry_event_handler(self, event) -> None:
@@ -171,8 +171,8 @@ class ClientHandlers:
                 self.message_list.tag_remove(remove_tag_name, 'matchStart', 'matchEnd')
             self.message_list.tag_add(tag_name, 'matchStart', 'matchEnd')
 
-    def message_list_push(self, client_id, client_profile, client_category,
-                          message_time, message, message_type) -> None:
+    def message_list_push(self, client_id: str, client_profile: str, client_category: str,
+                          message_time: str, message: str, message_type: str) -> None:
         formatted_message = f'| {client_id} ({message_time}) | {message}\n'
         if client_profile == 'app':
             formatted_message = f'{message}\n'

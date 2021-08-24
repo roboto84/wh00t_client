@@ -182,7 +182,7 @@ python-versions = "*"
 
 [[package]]
 name = "wh00t-core"
-version = "0.1.0"
+version = "0.1.1"
 description = 'Core libraries shared amongst the wh00t connected projects'
 category = "main"
 optional = false
@@ -192,8 +192,8 @@ develop = false
 [package.source]
 type = "git"
 url = 'https://github.com/roboto84/wh00t_core.git'
-reference = 'v0.1.0'
-resolved_reference = "adaf892a039bd59822c0c8d574b0d0b9ab653a1f"
+reference = 'v0.1.1'
+resolved_reference = "611af55665516c25e9dac4c1984e47cae6f9802d"
 
 [[package]]
 name = "win10toast"
@@ -209,7 +209,7 @@ pypiwin32 = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = '^3.8'
-content-hash = "2e24b640aa69f162c4fb4303c4f959285ac545bf05b99777bd4fa0f2150db9ee"
+content-hash = "3265d751517fe09eea7bd6f30ee2168e7c261e262a860f632348416086d72ed1"
 
 [metadata.files]
 atomicwrites = [
