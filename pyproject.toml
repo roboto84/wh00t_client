@@ -12,7 +12,7 @@ emoji = '^0.6.0'
 playsound = '^1.2.2'
 PyGObject = [{ version = '^3.36.1', platform = 'linux' }]
 win10toast = [{ version = '^0.9', platform = 'windows' }]
-wh00t-core = {git = 'https://github.com/roboto84/wh00t_core.git', tag = 'v0.1.1'}
+wh00t-core = {git = 'https://github.com/roboto84/wh00t_core.git', tag = 'v0.2.0'}
 
 [tool.poetry.dev-dependencies]
 pytest = '^5.2'
