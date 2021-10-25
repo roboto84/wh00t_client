@@ -9,9 +9,9 @@ python = '^3.8'
 python-dotenv = '^0.15.0'
 Pillow = '^7.2.0'
 emoji = '^0.6.0'
-playsound = '^1.2.2'
+playsound = '1.2.2'
 PyGObject = [{ version = '^3.36.1', platform = 'linux' }]
-win10toast = [{ version = '^0.9', platform = 'windows' }]
+win10toast = [{ version = '^0.9'}]
 wh00t-core = {git = 'https://github.com/roboto84/wh00t_core.git', tag = 'v0.2.1'}
 
 [tool.poetry.dev-dependencies]
