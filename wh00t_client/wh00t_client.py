@@ -83,10 +83,10 @@ class Wh00tClient(tk.Tk):
             font=self.wh00t_client_settings.button_font,
             bd=1,
             relief=self.wh00t_client_settings.message_submit_button_relief,
-            text='📨 Send',
+            text='🚀 Send',
             height=self.wh00t_client_settings.message_submit_button_height,
             width=8,
-            command=lambda: self.wh00t_client_network.send_wh00t_message(self.close_app),
+            command=lambda: self.wh00t_client_network.send_wh00t_message(),
             bg=self.wh00t_client_settings.background_color,
             fg=self.wh00t_client_settings.button_color,
             pady=self.wh00t_client_settings.message_submit_button_pad_y,
@@ -102,7 +102,7 @@ class Wh00tClient(tk.Tk):
         )
         self.wh00t_client_network: Wh00tClientNetwork = Wh00tClientNetwork(
             logging_object, self.wh00t_client_settings, chat_message,
-            self.wh00t_client_handlers
+            self.wh00t_client_handlers, self.close_app
         )
 
         # Set initial element properties.
@@ -111,7 +111,7 @@ class Wh00tClient(tk.Tk):
         chat_message.set('')
         message_list.bind('<Key>', lambda e: self.wh00t_client_handlers.message_list_event_handler(e))
         message_input_field.bind('<Key>', lambda e: self.wh00t_client_handlers.message_entry_event_handler(e))
-        message_input_field.bind('<Return>', lambda e: self.wh00t_client_network.send_wh00t_message(self.close_app))
+        message_input_field.bind('<Return>', lambda e: self.wh00t_client_network.send_wh00t_message())
         message_input_field.focus()
 
         # Set elements structure
@@ -132,7 +132,7 @@ class Wh00tClient(tk.Tk):
             self.after(50, self.close_app)
         else:
             self.wh00t_client_handlers.close_notify()
-            self.wh00t_client_network.client_socket.close()
+            self.wh00t_client_network.close_it()
             self.quit()
 
     def on_window_close(self, chat_message) -> None:
@@ -140,7 +140,7 @@ class Wh00tClient(tk.Tk):
             os._exit(1)
         else:
             chat_message.set(self.wh00t_client_settings.EXIT_STRING)
-            self.wh00t_client_network.send_wh00t_message(self.close_app)
+            self.wh00t_client_network.send_wh00t_message()
 
 
 if __name__ == '__main__':

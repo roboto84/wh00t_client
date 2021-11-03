@@ -12,7 +12,7 @@ from wh00t_core.library.client_network import ClientNetwork
 
 class Wh00tClientNetwork(ClientNetwork):
     def __init__(self, logging_object: logging, chat_client_settings: ClientSettings,
-                 chat_message: tk.StringVar, chat_client_handlers: ClientHandlers):
+                 chat_message: tk.StringVar, chat_client_handlers: ClientHandlers, close_app: Callable[[], None]):
         self.logging_object: logging = logging_object
         self.logger: logging.Logger = logging_object.getLogger(type(self).__name__)
         self.logger.setLevel(logging_object.INFO)
@@ -20,12 +20,13 @@ class Wh00tClientNetwork(ClientNetwork):
         self.client_settings: ClientSettings = chat_client_settings
         self.chat_message: tk.StringVar = chat_message
         self.chat_client_handlers: ClientHandlers = chat_client_handlers
+        self.close_app: Callable[[], None] = close_app
 
         address: Tuple = self.client_settings.get_server_address()
         super().__init__(address[0], address[1], self.client_settings.client_id,
                          self.client_settings.CLIENT_PROFILE, self.logging_object)
 
-    def send_wh00t_message(self, close_app: Callable[[], None]):
+    def send_wh00t_message(self):
         if self.client_socket_error:
             os._exit(1)
         else:
@@ -46,7 +47,7 @@ class Wh00tClientNetwork(ClientNetwork):
                     else:
                         super().send_message('chat_message', message)
                         if message == self.client_settings.EXIT_STRING:
-                            close_app()
+                            self.close_app()
             except IOError as io_error:
                 self.logger.error(f'Received IOError: {(str(io_error))}')
                 self.chat_client_handlers.message_list_push(
@@ -79,7 +80,9 @@ class Wh00tClientNetwork(ClientNetwork):
                                                         'local')
 
     def received_message_handler(self, package: dict) -> bool:
-        if package['message'] == self.client_settings.EXIT_STRING:
+        if not package:
+            self.close_app()
+        elif package['message'] == self.client_settings.EXIT_STRING:
             return False
         else:
             emoji_message = emoji.emojize(package['message'], use_aliases=True)

@@ -78,7 +78,7 @@ class ClientSettings:
             self.app_dimensions: dict = {'width': 665, 'height': 435}
             self.message_list_font: Tuple = ('DejaVu Sans', 12)
             self.entry_field_font: Tuple = ('DejaVu Sans', 15)
-            self.button_font: Tuple = ('DejaVu Sans', 12)
+            self.button_font: Tuple = ('DejaVu Sans', 13)
             self.emoji_font_size: int = 30
             self.bracket_highlight_font_size: int = 15
             self.message_list_width: int = 63
@@ -88,8 +88,8 @@ class ClientSettings:
             self.message_list_pad_x: int = 5
             self.message_list_pad_y: int = 7
             self.message_entry_border_dimension: int = 0
-            self.message_submit_button_height: int = 1
-            self.message_submit_button_pad_y: int = 5
+            self.message_submit_button_height: int = 0
+            self.message_submit_button_pad_y: int = 4
             self.message_list_border_dimension: int = 0
             self.message_submit_button_relief: str = 'flat'
 
