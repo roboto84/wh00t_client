@@ -15,8 +15,10 @@ from meme_collection import MemeCollection
 
 
 class Wh00tClient(tk.Tk):
-    def __init__(self, logging_object: logging, client_user_name: str, server_address: str, server_port: int):
+    def __init__(self, logging_object: logging, client_user_name: str, server_address: str, server_port: int,
+                 debug_switch: bool):
         super().__init__()
+        self.debug = debug_switch
         self.wh00t_client_settings: ClientSettings = ClientSettings(client_user_name, server_address, server_port)
         self.wh00t_client_meme_collection: MemeCollection = MemeCollection()
 
@@ -102,7 +104,7 @@ class Wh00tClient(tk.Tk):
         )
         self.wh00t_client_network: Wh00tClientNetwork = Wh00tClientNetwork(
             logging_object, self.wh00t_client_settings, chat_message,
-            self.wh00t_client_handlers, self.close_app
+            self.wh00t_client_handlers, self.close_app, self.debug
         )
 
         # Set initial element properties.
@@ -154,7 +156,8 @@ if __name__ == '__main__':
         CLIENT_USER_NAME: str = os.getenv('CLIENT_USER_NAME')
         SERVER_ADDRESS: str = os.getenv('SERVER_ADDRESS')
         SERVER_PORT: int = int(os.getenv('SERVER_PORT'))
-        wh00t_client: Wh00tClient = Wh00tClient(logging, CLIENT_USER_NAME, SERVER_ADDRESS, SERVER_PORT)
+        DEBUG = (os.getenv('DEBUG', str('False')).lower() in ("yes", "y", "true", "1", "t"))
+        wh00t_client: Wh00tClient = Wh00tClient(logging, CLIENT_USER_NAME, SERVER_ADDRESS, SERVER_PORT, DEBUG)
     except TypeError as type_error:
         logger.error('Received TypeError: Check that the .env project file is configured correctly')
         exit()

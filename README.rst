@@ -42,7 +42,7 @@ in the *same* directory it is running under. The format of the .env file should 
 
 An explained ``.env`` file format is shown below::
 
-    CLIENT_USER_NAME=ChillHopper
+    CLIENT_USER_NAME=<Username>
     SERVER_ADDRESS=<Server address>
     SERVER_PORT=<Server port>
 
@@ -51,6 +51,10 @@ A typical ``.env`` file may look like this::
     CLIENT_USER_NAME=ChillHopper
     SERVER_ADDRESS=192.168.0.102
     SERVER_PORT=3001
+
+Optional environmental variables are:
+
+| ``DEBUG`` : boolean value ('true' or 'false') which causes client to show extra debug information
 
 To run the script once the environment (.env) file is created, from within the wh00t_client directory, simply type::
 
