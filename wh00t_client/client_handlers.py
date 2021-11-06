@@ -171,9 +171,20 @@ class ClientHandlers:
                 self.message_list.tag_remove(remove_tag_name, 'matchStart', 'matchEnd')
             self.message_list.tag_add(tag_name, 'matchStart', 'matchEnd')
 
+    @staticmethod
+    def notification_formatted_message(client_id: str, message: str):
+        notification_formatted_message = f'{client_id}: {message}'
+        if len(message) > 58:
+            notification_substr = notification_formatted_message[0:57]
+            return f'{notification_substr}...'
+        else:
+            return notification_formatted_message
+
     def message_list_push(self, client_id: str, client_profile: str, client_category: str,
                           message_time: str, message: str, message_type: str) -> None:
         formatted_message = f'| {client_id} ({message_time}) | {message}\n'
+        notification = self.notification_formatted_message(client_id, message)
+
         if client_profile == 'app':
             formatted_message = f'{message}\n'
         self.message_list.insert(tkinter.END, formatted_message)
@@ -199,10 +210,10 @@ class ClientHandlers:
                 notification_delayed_action.start()
                 if self.client_settings.get_current_platform() == 'Windows':
                     win_notify = self.client_settings.get_windows_notifier()
-                    win_notify.show_toast('wh00t', 'new message', threaded=True, duration=3)
+                    win_notify.show_toast('wh00t', notification, threaded=True, duration=3)
                 elif self.client_settings.get_current_platform() == 'Linux':
                     lin_notify = self.client_settings.get_linux_notifier()
-                    lin_notify.update('wh00t', 'new message', self.client_settings.APP_ICON)
+                    lin_notify.update('wh00t', notification, self.client_settings.APP_ICON)
                     lin_notify.show()
 
     @staticmethod
