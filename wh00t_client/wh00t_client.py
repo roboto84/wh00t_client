@@ -6,6 +6,7 @@ import tkinter.font
 import os
 import ntpath
 import logging.config
+import webbrowser
 from PIL import ImageTk, Image
 from dotenv import load_dotenv
 from client_settings import ClientSettings
@@ -18,7 +19,7 @@ class Wh00tClient(tk.Tk):
     def __init__(self, logging_object: logging, client_user_name: str, server_address: str, server_port: int,
                  debug_switch: bool):
         super().__init__()
-        self.debug = debug_switch
+        self.debug: bool = debug_switch
         self.wh00t_client_settings: ClientSettings = ClientSettings(client_user_name, server_address, server_port)
         self.wh00t_client_meme_collection: MemeCollection = MemeCollection()
 
@@ -38,7 +39,8 @@ class Wh00tClient(tk.Tk):
             image=background_image,
             bg=self.wh00t_client_settings.background_color,
             highlightbackground=self.wh00t_client_settings.highlight_background_color,
-            highlightcolor=self.wh00t_client_settings.highlight_color
+            highlightcolor=self.wh00t_client_settings.highlight_color,
+            cursor='hand2'
         )
 
         message_input_field: tk.Entry = tkinter.Entry(
@@ -111,6 +113,7 @@ class Wh00tClient(tk.Tk):
         self.title(self.wh00t_client_settings.APP_TITLE)
         self.protocol('WM_DELETE_WINDOW', lambda: self.on_window_close(chat_message))
         chat_message.set('')
+        banner.bind("<1>", lambda e: webbrowser.open('https://github.com/roboto84/wh00t_client'))
         message_list.bind('<Key>', lambda e: self.wh00t_client_handlers.message_list_event_handler(e))
         message_input_field.bind('<Key>', lambda e: self.wh00t_client_handlers.message_entry_event_handler(e))
         message_input_field.bind('<Return>', lambda e: self.wh00t_client_network.send_wh00t_message())

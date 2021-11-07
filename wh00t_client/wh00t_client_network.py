@@ -22,7 +22,7 @@ class Wh00tClientNetwork(ClientNetwork):
         self.chat_message: tk.StringVar = chat_message
         self.chat_client_handlers: ClientHandlers = chat_client_handlers
         self.close_app: Callable[[], None] = close_app
-        self.debug = debug_switch
+        self.debug: bool = debug_switch
 
         address: Tuple = self.client_settings.get_server_address()
         super().__init__(address[0], address[1], self.client_settings.client_id,

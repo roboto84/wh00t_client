@@ -2,6 +2,9 @@
 import logging
 import tkinter
 import tkinter.font
+import webbrowser
+from meme_collection import MemeCollection
+from client_settings import ClientSettings
 from typing import Optional, List, Callable
 from threading import Thread, Timer
 from playsound import playsound
@@ -10,44 +13,60 @@ from bin.help import HelpMenu
 
 
 class ClientHandlers:
-    def __init__(self, logging_object, client_settings, client_meme_collection, chat_message,
+    def __init__(self, logging_object, client_settings, client_meme_collection, chat_message: tkinter.StringVar,
                  message_input_field, message_list):
         self.logger: logging.Logger = logging_object.getLogger(type(self).__name__)
         self.logger.setLevel(logging_object.INFO)
 
-        self.chat_message = chat_message
-        self.message_input_field = message_input_field
-        self.client_settings = client_settings
-        self.client_meme_collection = client_meme_collection
-        self.message_list = message_list
+        self.chat_message: tkinter.StringVar = chat_message
+        self.message_input_field: tkinter.Entry = message_input_field
+        self.client_settings: ClientSettings = client_settings
+        self.client_meme_collection: MemeCollection = client_meme_collection
+        self.message_list: tkinter.Text = message_list
 
-        self.emoji_sentence_lock = False
-        self.message_list_message_history = []
-        self.message_history_index = 0
-        self.user_handle = self.client_settings.client_id
-        self.emoji_dict_keys = list(Emojis.keys())
-        self.emoji_paging_index = 0
-        self.receive_thread = None
-        self.message_cache = None
+        self.emoji_sentence_lock: bool = False
+        self.message_list_message_history: List[str] = []
+        self.message_history_index: int = 0
+        self.user_handle: str = self.client_settings.client_id
+        self.emoji_dict_keys: List[str] = list(Emojis.keys())
+        self.emoji_paging_index: int = 0
+        self.receive_thread: Optional[Thread] = None
+        self.message_cache: Optional[str] = None
+        self.message_hyperlinks: List[dict] = []
 
-        emoji_font = tkinter.font.Font(self.message_list, self.message_list.cget('font'))
-        brackets_font = tkinter.font.Font(self.message_list, self.message_list.cget('font'))
-        general_font = tkinter.font.Font(self.message_list, self.message_list.cget('font'))
+        self.general_font: tkinter.font = tkinter.font.Font(self.message_list, self.message_list.cget('font'))
+        emoji_font: tkinter.font = tkinter.font.Font(self.message_list, self.message_list.cget('font'))
+        brackets_font: tkinter.font = tkinter.font.Font(self.message_list, self.message_list.cget('font'))
+
         emoji_font.configure(size=client_settings.emoji_font_size)
         brackets_font.configure(size=client_settings.bracket_highlight_font_size, slant='italic')
+
         self.message_list.tag_configure('Emoji', font=emoji_font, foreground=client_settings.emoji_color)
         self.message_list.tag_configure('Brackets', font=brackets_font,
                                         foreground=client_settings.bracket_highlight_color)
-        self.message_list.tag_configure('UserHandle', font=general_font, foreground=client_settings.user_handle_color)
-        self.message_list.tag_configure('OtherUsersHandle', font=general_font,
+        self.message_list.tag_configure('UserHandle', font=self.general_font,
+                                        foreground=client_settings.user_handle_color)
+        self.message_list.tag_configure('OtherUsersHandle', font=self.general_font,
                                         foreground=client_settings.other_user_handles_color)
-        self.message_list.tag_configure('System', font=general_font, foreground=client_settings.system_color)
+        self.message_list.tag_configure('System', font=self.general_font, foreground=client_settings.system_color)
 
-    def thread_it(self, socket_receive: Callable[[], None]):
+    def _enter(self, event) -> None:
+        self.message_list.config(cursor='hand2')
+
+    def _leave(self, event) -> None:
+        self.message_list.config(cursor='')
+
+    def _click(self, event) -> None:
+        for tag in self.message_list.tag_names(tkinter.CURRENT):
+            if tag[:6] == 'hyper-':
+                webbrowser.open(self.message_hyperlinks[int(tag[6])]['link'])
+                return
+
+    def thread_it(self, socket_receive: Callable[[], None]) -> None:
         self.receive_thread = Thread(target=socket_receive)
         self.receive_thread.start()
 
-    def close_notify(self):
+    def close_notify(self) -> None:
         if self.client_settings.get_current_platform() == 'Linux':
             self.client_settings.linux_notify.uninit()
 
@@ -79,7 +98,7 @@ class ClientHandlers:
             self.message_list_push('wh00t', 'app', 'internal_message', self.client_settings.message_time(),
                                    '\nCommand not recognized, type /help for list of supported commands\n', 'local')
 
-    def message_list_event_handler(self, event):
+    def message_list_event_handler(self, event) -> Optional[str]:
         self.logger.debug(str(event))
         if event.keycode == 67 and event.keysym == 'c':  # Windows
             return
@@ -152,9 +171,42 @@ class ClientHandlers:
             self.message_input_field.select_range(0, 'end')
         return
 
-    def tag_custom_font(self, tag_name, regex, remove_tag_name=None, remove_tag_first=False) -> None:
-        self.message_list.tag_remove(tag_name, '1.0', 'end')
+    def tag_hyperlinks(self) -> None:
+        self.message_hyperlinks = []
+        count = tkinter.IntVar()
+        loop_counter = 0
+        regex = r'((http|ftp|https)\:\/\/)?([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?'
 
+        self.message_list.mark_set('matchStart', '1.0')
+        self.message_list.mark_set('matchEnd', '1.0')
+
+        while True:
+            start_index = self.message_list.search(regex, 'matchEnd', 'end', count=count, regexp=True)
+            end_index = '%s+%sc' % (start_index, count.get())
+            if start_index == '':
+                break  # no match was found
+
+            self.message_list.mark_set('matchStart', start_index)
+            self.message_list.mark_set('matchEnd', end_index)
+            hyperlink_tag = "hyper-%d" % loop_counter
+
+            self.message_hyperlinks.append({
+                'start_index': start_index,
+                'end_index': end_index,
+                'link': self.message_list.get(start_index, end_index),
+                'tag': hyperlink_tag
+            })
+
+            self.message_list.tag_add(hyperlink_tag, 'matchStart', 'matchEnd')
+            self.message_list.tag_bind(hyperlink_tag, "<Button-1>", self._click)
+            self.message_list.tag_config(hyperlink_tag, font=self.general_font,
+                                         foreground=self.client_settings.system_color, underline=1)
+            self.message_list.tag_bind(hyperlink_tag, "<Enter>", self._enter)
+            self.message_list.tag_bind(hyperlink_tag, "<Leave>", self._leave)
+            self.message_list.tag_bind(hyperlink_tag, "<Button-1>", self._click)
+            loop_counter += 1
+
+    def tag_custom_font(self, tag_name, regex, remove_tag_name=None, remove_tag_first=False) -> None:
         count = tkinter.IntVar()
         self.message_list.mark_set('matchStart', '1.0')
         self.message_list.mark_set('matchEnd', '1.0')
@@ -172,7 +224,7 @@ class ClientHandlers:
             self.message_list.tag_add(tag_name, 'matchStart', 'matchEnd')
 
     @staticmethod
-    def notification_formatted_message(client_id: str, message: str):
+    def notification_formatted_message(client_id: str, message: str) -> str:
         notification_formatted_message = f'{client_id}: {message}'
         if len(message) > 58:
             notification_substr = notification_formatted_message[0:57]
@@ -193,6 +245,7 @@ class ClientHandlers:
         self.tag_custom_font('OtherUsersHandle', r'\|.*\|')
         self.tag_custom_font('UserHandle', r'\| {}.*\|'.format(self.user_handle), 'OtherUsersHandle', True)
         self.tag_custom_font('System', r'\~.*\~')
+        self.tag_hyperlinks()
         self.message_list.see('end')
 
         if (message_type != 'local') and (formatted_message.find(f'| {self.user_handle} ({message_time}) |') < 0):
