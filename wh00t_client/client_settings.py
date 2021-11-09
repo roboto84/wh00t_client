@@ -57,6 +57,7 @@ class ClientSettings:
             self.emoji_font_size: int = 32
             self.bracket_highlight_font_size: int = 16
             self.message_list_width: int = 70
+            self.message_list_height: int = 11
             self.message_input_width: int = 45
             self.message_list_highlight_thickness: int = 8
             self.message_list_spacing1: int = 1
@@ -64,6 +65,7 @@ class ClientSettings:
             self.message_list_pad_y: int = 1
             self.message_entry_border_dimension: int = 1
             self.message_submit_button_height: int = 1
+            self.message_submit_button_width: int = 8
             self.message_submit_button_pad_y: int = 4
             self.message_list_border_dimension: int = 2
             self.message_submit_button_relief: str = 'ridge'
@@ -82,6 +84,7 @@ class ClientSettings:
             self.emoji_font_size: int = 30
             self.bracket_highlight_font_size: int = 15
             self.message_list_width: int = 63
+            self.message_list_height: int = 11
             self.message_input_width: int = 40
             self.message_list_highlight_thickness: int = 6
             self.message_list_spacing1: int = 5
@@ -89,6 +92,7 @@ class ClientSettings:
             self.message_list_pad_y: int = 7
             self.message_entry_border_dimension: int = 0
             self.message_submit_button_height: int = 0
+            self.message_submit_button_width: int = 8
             self.message_submit_button_pad_y: int = 4
             self.message_list_border_dimension: int = 0
             self.message_submit_button_relief: str = 'flat'
