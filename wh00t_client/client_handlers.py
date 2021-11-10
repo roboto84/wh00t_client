@@ -59,7 +59,7 @@ class ClientHandlers:
     def _click(self, event) -> None:
         for tag in self.message_list.tag_names(tkinter.CURRENT):
             if tag[:6] == 'hyper-':
-                webbrowser.open(self.message_hyperlinks[int(tag[6])]['link'])
+                webbrowser.open(self.message_hyperlinks[int(tag[6:])]['link'])
                 return
 
     def thread_it(self, socket_receive: Callable[[], None]) -> None:
