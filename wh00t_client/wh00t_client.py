@@ -132,16 +132,21 @@ class Wh00tClient(tk.Tk):
         self.wh00t_client_handlers.thread_it(self.wh00t_client_network.receive_wh00t_message)
         self.mainloop()
 
+    def clean_up(self) -> None:
+        self.wh00t_client_handlers.close_timers()
+        self.wh00t_client_handlers.close_notify()
+        self.wh00t_client_network.close_it()
+
     def close_app(self) -> None:
         if self.wh00t_client_handlers.receive_thread.is_alive():
             self.after(50, self.close_app)
         else:
-            self.wh00t_client_handlers.close_notify()
-            self.wh00t_client_network.close_it()
+            self.clean_up()
             self.quit()
 
     def on_window_close(self, chat_message) -> None:
         if self.wh00t_client_network.client_socket_error:
+            self.clean_up()
             os._exit(1)
         else:
             chat_message.set(self.wh00t_client_settings.EXIT_STRING)

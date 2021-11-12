@@ -9,8 +9,10 @@ HelpMenu = [
     '/noNotification - turn notification toast off',
     '/emojis - print list of page up/down supported emojis',
     '/meme {memeName} - sends specific meme as a message. See /memes',
-    '/memes - prints out a list of available meme commands'
+    '/memes - prints out a list of available meme commands',
+    '/boom {secret message} - self destruct secret message in 60 sec'
 ]
+HelpMenu.sort()
 
 HelpMeme = [
     '/meme luv - prints luv bear meme',

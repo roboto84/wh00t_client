@@ -21,6 +21,7 @@ class ClientSettings:
     USER_ALERT_SOUND: str = os.path.join(HOME_PATH, 'assets/audio/AORiver.wav')
     ALERT_COMMAND: str = '/ao'
     EXIT_STRING: str = '/exit'
+    SELF_DESTRUCT: str = '/boom'
     CLIENT_PROFILE: str = 'user'
 
     def __init__(self, client_user_name: str, host: str, port: int):

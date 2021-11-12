@@ -33,6 +33,7 @@ class ClientHandlers:
         self.receive_thread: Optional[Thread] = None
         self.message_cache: Optional[str] = None
         self.message_hyperlinks: List[dict] = []
+        self.timers: List[Timer] = []
 
         self.general_font: tkinter.font = tkinter.font.Font(self.message_list, self.message_list.cget('font'))
         emoji_font: tkinter.font = tkinter.font.Font(self.message_list, self.message_list.cget('font'))
@@ -232,6 +233,11 @@ class ClientHandlers:
         else:
             return notification_formatted_message
 
+    def delete_message(self, message: str) -> None:
+        count = tkinter.IntVar()
+        index = self.message_list.search(message, '1.0', stopindex='end', count=count)
+        self.message_list.delete(index, "%s + %sc" % (index, count.get()))
+
     def message_list_push(self, client_id: str, client_profile: str, client_category: str,
                           message_time: str, message: str, message_type: str) -> None:
         formatted_message = f'| {client_id} ({message_time}) | {message}\n'
@@ -239,6 +245,11 @@ class ClientHandlers:
 
         if client_profile == 'app':
             formatted_message = f'{message}\n'
+        if formatted_message.find(self.client_settings.SELF_DESTRUCT) != -1:
+            self_destruct_timer = Timer(60.0, self.delete_message, [formatted_message])
+            self_destruct_timer.start()
+            self.timers.append(self_destruct_timer)
+
         self.message_list.insert(tkinter.END, formatted_message)
         self.tag_custom_font('Emoji', r'[\u263a-\U0001f645]')
         self.tag_custom_font('Brackets', r'\[.*\]')
@@ -268,6 +279,10 @@ class ClientHandlers:
                     lin_notify = self.client_settings.get_linux_notifier()
                     lin_notify.update('wh00t', notification, self.client_settings.APP_ICON)
                     lin_notify.show()
+
+    def close_timers(self):
+        for timer in self.timers:
+            timer.cancel()
 
     @staticmethod
     def print_help() -> str:

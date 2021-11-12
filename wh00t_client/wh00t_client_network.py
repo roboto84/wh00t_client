@@ -38,9 +38,11 @@ class Wh00tClientNetwork(ClientNetwork):
                     self.chat_client_handlers.message_history_handler(message)
                     if self.chat_client_handlers.emoji_sentence_lock:
                         self.chat_client_handlers.emoji_message_handler(message)
-                    elif ((len(message) != 0) and (message != self.client_settings.EXIT_STRING) and
-                          (message != self.client_settings.ALERT_COMMAND) and (message[0] == '/') and (
-                                  message.count('/') == 1)):
+                    elif ((len(message) != 0) and
+                          (message not in (self.client_settings.EXIT_STRING, self.client_settings.ALERT_COMMAND)) and
+                          (message.find(self.client_settings.SELF_DESTRUCT) == -1) and
+                          (message[0] == '/') and
+                          (message.count('/') == 1)):
                         if message.find('/meme ') >= 0:
                             self.multi_wh00t_message('meme_message',
                                                      self.chat_client_handlers.message_command_handler(message))
