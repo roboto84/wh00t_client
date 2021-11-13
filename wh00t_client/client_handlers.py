@@ -264,6 +264,7 @@ class ClientHandlers:
                 self.client_settings.set_sound_alert_preference(False)
                 sound_delayed_action = Timer(5.0, self.client_settings.set_sound_alert_preference, [True])
                 sound_delayed_action.start()
+                self.timers.append(sound_delayed_action)
                 if message.find(f'{self.client_settings.ALERT_COMMAND}') < 0:
                     playsound(self.client_settings.MESSAGE_SOUND)
                 else:
@@ -272,6 +273,7 @@ class ClientHandlers:
                 self.client_settings.set_notification_alert_preference(False)
                 notification_delayed_action = Timer(5.0, self.client_settings.set_notification_alert_preference, [True])
                 notification_delayed_action.start()
+                self.timers.append(notification_delayed_action)
                 if self.client_settings.get_current_platform() == 'Windows':
                     win_notify = self.client_settings.get_windows_notifier()
                     win_notify.show_toast('wh00t', notification, threaded=True, duration=3)
