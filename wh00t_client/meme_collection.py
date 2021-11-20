@@ -8,7 +8,7 @@ from bin.help import HelpMeme
 class MemeCollection:
     def meme(self, meme_type) -> List[str]:
         ascii_array: List[str] = [f':face_with_raised_eyebrow: Sorry, '
-                                  f'meme type "{meme_type}" doesn\'t exist.']
+                                  f'meme type "{meme_type}" does not exist.']
         if meme_type == 'tableFlip':
             ascii_array = self.table_flip_ascii()
         elif meme_type == 'hurry':

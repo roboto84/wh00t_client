@@ -11,18 +11,19 @@ from __init__ import __version__
 
 
 class ClientSettings:
-    CLIENT_VERSION: str = __version__
-    CURRENT_PLATFORM: str = platform.system()
-    APP_TITLE: str = 'wh00t'
-    HOME_PATH: str = ntpath.dirname(__file__)
-    APP_BANNER: str = os.path.join(HOME_PATH, 'assets/visual/banner.png')  # Banner Should be 663w x 90h pixels
-    APP_ICON: str = os.path.join(HOME_PATH, 'assets/visual/icon.png')
-    MESSAGE_SOUND: str = os.path.join(HOME_PATH, 'assets/audio/wh00t7.wav')
-    USER_ALERT_SOUND: str = os.path.join(HOME_PATH, 'assets/audio/AORiver.wav')
-    ALERT_COMMAND: str = '/ao'
-    EXIT_STRING: str = '/exit'
-    SELF_DESTRUCT: str = '/boom'
-    CLIENT_PROFILE: str = 'user'
+    _CLIENT_VERSION: str = __version__
+    _CURRENT_PLATFORM: str = platform.system()
+    _APP_TITLE: str = 'wh00t'
+    _HOME_PATH: str = ntpath.dirname(__file__)
+    _APP_BANNER: str = os.path.join(_HOME_PATH, 'assets/visual/banner.png')  # Banner Should be 663w x 90h pixels
+    _APP_ICON: str = os.path.join(_HOME_PATH, 'assets/visual/icon.png')
+    _MESSAGE_SOUND: str = os.path.join(_HOME_PATH, 'assets/audio/wh00t7.wav')
+    _USER_ALERT_SOUND: str = os.path.join(_HOME_PATH, 'assets/audio/AORiver.wav')
+    _ALERT_COMMAND: str = '/ao'
+    _EXIT_STRING: str = '/exit'
+    _SELF_DESTRUCT: str = '/boom'
+    _CLIENT_PROFILE: str = 'user'
+    _SERVER_PROFILE: str = 'wh00t_server'
 
     def __init__(self, client_user_name: str, host: str, port: int):
         self.client_id: str = client_user_name
@@ -46,7 +47,7 @@ class ClientSettings:
         self.other_user_handles_color: str = BaseTheme['other_user_handles_color']
         self.system_color: str = BaseTheme['system_color']
 
-        if self.CURRENT_PLATFORM == 'Windows':
+        if self._CURRENT_PLATFORM == 'Windows':
             # import pyglet
             from win10toast import ToastNotifier
             # pyglet.font.add_file('file.ttf')
@@ -71,12 +72,12 @@ class ClientSettings:
             self.message_list_border_dimension: int = 2
             self.message_submit_button_relief: str = 'ridge'
 
-        elif self.CURRENT_PLATFORM == 'Linux':
+        elif self._CURRENT_PLATFORM == 'Linux':
             import gi
             gi.require_version('Notify', '0.7')
             from gi.repository import Notify
             self.linux_notify: Notify = Notify
-            self.linux_notify.init(self.APP_TITLE)
+            self.linux_notify.init(self._APP_TITLE)
             self.linux_notification = self.linux_notify.Notification.new("messageAlert")
             self.app_dimensions: dict = {'width': 665, 'height': 435}
             self.message_list_font: Tuple = ('DejaVu Sans', 12)
@@ -114,13 +115,46 @@ class ClientSettings:
         return self.sound_alert_preference
 
     def get_current_platform(self) -> str:
-        return self.CURRENT_PLATFORM
+        return self._CURRENT_PLATFORM
 
     def get_linux_notifier(self):
         return self.linux_notification
 
     def get_windows_notifier(self):
         return self.windows_notification
+
+    def get_client_version(self):
+        return self._CLIENT_VERSION
+
+    def get_app_title(self):
+        return self._APP_TITLE
+
+    def get_app_banner(self):
+        return self._APP_BANNER
+
+    def get_app_icon(self):
+        return self._APP_ICON
+
+    def get_message_sound(self):
+        return self._MESSAGE_SOUND
+
+    def get_user_alert_sound(self):
+        return self._USER_ALERT_SOUND
+
+    def get_alert_command(self):
+        return self._ALERT_COMMAND
+
+    def get_exit_string(self):
+        return self._EXIT_STRING
+
+    def get_self_destruct(self):
+        return self._SELF_DESTRUCT
+
+    def get_client_profile(self):
+        return self._CLIENT_PROFILE
+
+    def get_server_profile(self):
+        return self._SERVER_PROFILE
 
     @staticmethod
     def message_time() -> str:

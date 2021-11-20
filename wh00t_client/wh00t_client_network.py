@@ -23,10 +23,11 @@ class Wh00tClientNetwork(ClientNetwork):
         self.chat_client_handlers: ClientHandlers = chat_client_handlers
         self.close_app: Callable[[], None] = close_app
         self.debug: bool = debug_switch
+        self.client_socket_error = False
 
         address: Tuple = self.client_settings.get_server_address()
         super().__init__(address[0], address[1], self.client_settings.client_id,
-                         self.client_settings.CLIENT_PROFILE, self.logging_object)
+                         self.client_settings.get_client_profile(), self.logging_object)
 
     def send_wh00t_message(self):
         if self.client_socket_error:
@@ -39,8 +40,9 @@ class Wh00tClientNetwork(ClientNetwork):
                     if self.chat_client_handlers.emoji_sentence_lock:
                         self.chat_client_handlers.emoji_message_handler(message)
                     elif ((len(message) != 0) and
-                          (message not in (self.client_settings.EXIT_STRING, self.client_settings.ALERT_COMMAND)) and
-                          (message.find(self.client_settings.SELF_DESTRUCT) == -1) and
+                          (message not in (self.client_settings.get_exit_string(),
+                                           self.client_settings.get_alert_command())) and
+                          (message.find(self.client_settings.get_self_destruct()) == -1) and
                           (message[0] == '/') and
                           (message.count('/') == 1)):
                         if message.find('/meme ') >= 0:
@@ -50,14 +52,14 @@ class Wh00tClientNetwork(ClientNetwork):
                             self.chat_client_handlers.message_command_handler(message)
                     else:
                         super().send_message('chat_message', message)
-                        if message == self.client_settings.EXIT_STRING:
+                        if message == self.client_settings.get_exit_string():
                             self.close_app()
             except IOError as io_error:
                 self.logger.error(f'Received IOError: {(str(io_error))}')
                 self.chat_client_handlers.message_list_push(
                     self.client_settings.client_id,
-                    'app',
-                    'internal_message',
+                    self.chat_client_handlers.get_application_profile_identifier(),
+                    self.chat_client_handlers.get_internal_client_category(),
                     self.client_settings.message_time(),
                     '\nDetected remote server disconnect. Shutting down client on next input, check server please.',
                     'local'
@@ -77,8 +79,8 @@ class Wh00tClientNetwork(ClientNetwork):
         except SyntaxError as syntax_error:
             self.logger.error(f'Received SyntaxError: {str(syntax_error)}')
             self.chat_client_handlers.message_list_push(self.client_settings.client_id,
-                                                        'app',
-                                                        'internal_message',
+                                                        self.chat_client_handlers.get_application_profile_identifier(),
+                                                        self.chat_client_handlers.get_internal_client_category(),
                                                         self.client_settings.message_time(),
                                                         '\nReceived unsupported characters in message',
                                                         'local')
@@ -86,11 +88,12 @@ class Wh00tClientNetwork(ClientNetwork):
     def received_message_handler(self, package: dict) -> bool:
         if not package:
             self.close_app()
-        elif package['message'] == self.client_settings.EXIT_STRING:
+        elif package['message'] == self.client_settings.get_exit_string():
             return False
         else:
-            if (package['profile'] != 'app') or \
-                    (package['id'] == 'wh00t_server' and (package['category'].find('debug') == -1)) \
+            if (package['profile'] != self.chat_client_handlers.get_application_profile_identifier()) or \
+                    (package['id'] == self.client_settings.get_server_profile()
+                     and (package['category'].find('debug') == -1)) \
                     or self.debug:
                 emoji_message = emoji.emojize(package['message'], use_aliases=True)
                 self.number_of_messages += 1

@@ -24,32 +24,41 @@ class ClientHandlers:
         self.client_meme_collection: MemeCollection = client_meme_collection
         self.message_list: tkinter.Text = message_list
 
-        self.emoji_sentence_lock: bool = False
-        self.message_list_message_history: List[str] = []
-        self.message_history_index: int = 0
-        self.user_handle: str = self.client_settings.client_id
-        self.emoji_dict_keys: List[str] = list(Emojis.keys())
-        self.emoji_paging_index: int = 0
-        self.receive_thread: Optional[Thread] = None
-        self.message_cache: Optional[str] = None
-        self.message_hyperlinks: List[dict] = []
-        self.timers: List[Timer] = []
+        self._message_list_message_history: List[str] = []
+        self._message_cache: Optional[str] = None
+        self._message_hyperlinks: List[dict] = []
+        self._timers: List[Timer] = []
+        self._general_font: tkinter.font = tkinter.font.Font(self.message_list, self.message_list.cget('font'))
+        self._message_history_index: int = 0
+        self._user_handle: str = self.client_settings.client_id
+        self._emoji_dict_keys: List[str] = list(Emojis.keys())
+        self._emoji_paging_index: int = 0
+        self._hyperlink_tag_prefix: str = 'hyper-'
+        self._application_profile_identifier: str = 'app'
+        self._internal_client_category: str = 'internal_message'
 
-        self.general_font: tkinter.font = tkinter.font.Font(self.message_list, self.message_list.cget('font'))
+        self.emoji_sentence_lock: bool = False
+        self.receive_thread: Optional[Thread] = None
+
         emoji_font: tkinter.font = tkinter.font.Font(self.message_list, self.message_list.cget('font'))
         brackets_font: tkinter.font = tkinter.font.Font(self.message_list, self.message_list.cget('font'))
-
         emoji_font.configure(size=client_settings.emoji_font_size)
         brackets_font.configure(size=client_settings.bracket_highlight_font_size, slant='italic')
 
         self.message_list.tag_configure('Emoji', font=emoji_font, foreground=client_settings.emoji_color)
         self.message_list.tag_configure('Brackets', font=brackets_font,
                                         foreground=client_settings.bracket_highlight_color)
-        self.message_list.tag_configure('UserHandle', font=self.general_font,
+        self.message_list.tag_configure('User_Handle', font=self._general_font,
                                         foreground=client_settings.user_handle_color)
-        self.message_list.tag_configure('OtherUsersHandle', font=self.general_font,
+        self.message_list.tag_configure('Other_Users_Handle', font=self._general_font,
                                         foreground=client_settings.other_user_handles_color)
-        self.message_list.tag_configure('System', font=self.general_font, foreground=client_settings.system_color)
+        self.message_list.tag_configure('System', font=self._general_font, foreground=client_settings.system_color)
+
+    def get_application_profile_identifier(self):
+        return self._application_profile_identifier
+
+    def get_internal_client_category(self):
+        return self._internal_client_category
 
     def _enter(self, event) -> None:
         self.message_list.config(cursor='hand2')
@@ -59,8 +68,8 @@ class ClientHandlers:
 
     def _click(self, event) -> None:
         for tag in self.message_list.tag_names(tkinter.CURRENT):
-            if tag[:6] == 'hyper-':
-                webbrowser.open(self.message_hyperlinks[int(tag[6:])]['link'])
+            if tag[:6] == self._hyperlink_tag_prefix:
+                webbrowser.open(self._message_hyperlinks[int(tag[6:])]['link'])
                 return
 
     def thread_it(self, socket_receive: Callable[[], None]) -> None:
@@ -84,19 +93,29 @@ class ClientHandlers:
         elif message == '/notify':
             self.client_settings.set_notification_alert_preference(True)
         elif message == '/version':
-            self.message_list_push('wh00t', 'app', 'internal_message', self.client_settings.message_time(),
-                                   f'\n     wh00t client v{self.client_settings.CLIENT_VERSION}\n', 'local')
+            self.message_list_push(self.client_settings.get_app_title(), self.get_application_profile_identifier(),
+                                   self.get_internal_client_category(),
+                                   self.client_settings.message_time(),
+                                   f'\n     wh00t client v{self.client_settings.get_client_version()}\n', 'local')
         elif message == '/help':
-            self.message_list_push('wh00t', 'app', 'internal_message', self.client_settings.message_time(),
-                                   self.print_help(), 'local')
+            self.message_list_push(self.client_settings.get_app_title(), self.get_application_profile_identifier(),
+                                   self.get_internal_client_category(),
+                                   self.client_settings.message_time(),
+                                   self._print_help(), 'local')
         elif message == '/memes':
-            self.message_list_push('wh00t', 'app', 'internal_message', self.client_settings.message_time(),
+            self.message_list_push(self.client_settings.get_app_title(), self.get_application_profile_identifier(),
+                                   self.get_internal_client_category(),
+                                   self.client_settings.message_time(),
                                    self.client_meme_collection.print_memes_help(), 'local')
         elif message == '/emojis':
-            self.message_list_push('wh00t', 'app', 'internal_message', self.client_settings.message_time(),
+            self.message_list_push(self.client_settings.get_app_title(), self.get_application_profile_identifier(),
+                                   self.get_internal_client_category(),
+                                   self.client_settings.message_time(),
                                    self.client_meme_collection.print_emojis_help(), 'local')
         else:
-            self.message_list_push('wh00t', 'app', 'internal_message', self.client_settings.message_time(),
+            self.message_list_push(self.client_settings.get_app_title(), self.get_application_profile_identifier(),
+                                   self.get_internal_client_category(),
+                                   self.client_settings.message_time(),
                                    '\nCommand not recognized, type /help for list of supported commands\n', 'local')
 
     def message_list_event_handler(self, event) -> Optional[str]:
@@ -109,71 +128,71 @@ class ClientHandlers:
             return 'break'
 
     def message_history_handler(self, message: str) -> None:
-        self.message_list_message_history.append(message)
-        if len(self.message_list_message_history) > 10:
-            del self.message_list_message_history[0]
-        self.message_history_index = len(self.message_list_message_history) - 1
+        self._message_list_message_history.append(message)
+        if len(self._message_list_message_history) > 10:
+            del self._message_list_message_history[0]
+        self._message_history_index = len(self._message_list_message_history) - 1
         self.chat_message.set('')
 
-    def emoji_message_cache(self) -> None:
-        if not self.emoji_sentence_lock and (self.chat_message.get() not in self.emoji_dict_keys):
-            self.set_emoji_sentence_lock(True)
-            self.message_cache = self.chat_message.get()
+    def _emoji_message_cache(self) -> None:
+        if not self.emoji_sentence_lock and (self.chat_message.get() not in self._emoji_dict_keys):
+            self._set_emoji_sentence_lock(True)
+            self._message_cache = self.chat_message.get()
 
-    def emoji_message_cache_check_not_empty(self) -> None:
-        if not self.message_cache.replace(' ', ''):
-            self.set_emoji_sentence_lock(False)
+    def _emoji_message_cache_check_not_empty(self) -> None:
+        if not self._message_cache.replace(' ', ''):
+            self._set_emoji_sentence_lock(False)
 
     def emoji_message_handler(self, message: str) -> None:
-        self.set_emoji_sentence_lock(False)
-        self.chat_message.set(f'{self.message_cache}{message}')
+        self._set_emoji_sentence_lock(False)
+        self.chat_message.set(f'{self._message_cache}{message}')
         self.message_input_field.icursor(len(self.chat_message.get()))
 
-    def set_emoji_sentence_lock(self, lock_state: bool) -> None:
+    def _set_emoji_sentence_lock(self, lock_state: bool) -> None:
         self.emoji_sentence_lock = lock_state
 
     def message_entry_event_handler(self, event) -> None:
         self.logger.debug(str(event))
         if event.keysym == 'Escape':
             if self.emoji_sentence_lock:
-                self.chat_message.set(self.message_cache)
+                self.chat_message.set(self._message_cache)
                 self.emoji_sentence_lock = False
             else:
-                self.chat_message.set(self.client_settings.EXIT_STRING)
+                self.chat_message.set(self.client_settings.get_exit_string())
             self.message_input_field.icursor(len(self.chat_message.get()))
         elif event.keysym == 'Up':
-            if self.message_history_index < 0:
-                self.message_history_index = len(self.message_list_message_history) - 1
-            if len(self.message_list_message_history) != 0:
-                self.chat_message.set(self.message_list_message_history[self.message_history_index])
+            if self._message_history_index < 0:
+                self._message_history_index = len(self._message_list_message_history) - 1
+            if len(self._message_list_message_history) != 0:
+                self.chat_message.set(self._message_list_message_history[self._message_history_index])
                 self.message_input_field.icursor(len(self.chat_message.get()))
-                self.message_history_index -= 1
+                self._message_history_index -= 1
         elif event.keysym == 'Down':
-            self.emoji_paging_index = 0
-            self.message_history_index = len(self.message_list_message_history) - 1
+            self._emoji_paging_index = 0
+            self._message_history_index = len(self._message_list_message_history) - 1
             self.chat_message.set('')
-            self.message_cache = ''
+            self._message_cache = ''
         elif (event.keysym == 'Prior') or (event.keysym == 'Next'):
-            self.emoji_message_cache()
+            self._emoji_message_cache()
             if event.keysym == 'Prior':
-                self.emoji_paging_index += 1
-                if self.emoji_paging_index > len(self.emoji_dict_keys) - 1:
-                    self.emoji_paging_index = 0
-                self.chat_message.set(self.emoji_dict_keys[self.emoji_paging_index])
+                self._emoji_paging_index += 1
+                if self._emoji_paging_index > len(self._emoji_dict_keys) - 1:
+                    self._emoji_paging_index = 0
+                self.chat_message.set(self._emoji_dict_keys[self._emoji_paging_index])
                 self.message_input_field.icursor(len(self.chat_message.get()))
             elif event.keysym == 'Next':
-                self.emoji_paging_index -= 1
-                if self.emoji_paging_index < 0:
-                    self.emoji_paging_index = len(self.emoji_dict_keys) - 1
-                self.chat_message.set(self.emoji_dict_keys[self.emoji_paging_index])
+                self._emoji_paging_index -= 1
+                if self._emoji_paging_index < 0:
+                    self._emoji_paging_index = len(self._emoji_dict_keys) - 1
+                self.chat_message.set(self._emoji_dict_keys[self._emoji_paging_index])
                 self.message_input_field.icursor(len(self.chat_message.get()))
-            self.emoji_message_cache_check_not_empty()
+            self._emoji_message_cache_check_not_empty()
         elif event.char and event.char == '\x01' and event.keycode == 38 and event.keysym == 'a':
             self.message_input_field.select_range(0, 'end')
         return
 
-    def tag_hyperlinks(self) -> None:
-        self.message_hyperlinks = []
+    def _tag_hyperlinks(self) -> None:
+        self._message_hyperlinks = []
         count = tkinter.IntVar()
         loop_counter = 0
         regex = r'((http|ftp|https)\:\/\/)?([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?'
@@ -189,9 +208,9 @@ class ClientHandlers:
 
             self.message_list.mark_set('matchStart', start_index)
             self.message_list.mark_set('matchEnd', end_index)
-            hyperlink_tag = "hyper-%d" % loop_counter
+            hyperlink_tag = f'{self._hyperlink_tag_prefix}%d' % loop_counter
 
-            self.message_hyperlinks.append({
+            self._message_hyperlinks.append({
                 'start_index': start_index,
                 'end_index': end_index,
                 'link': self.message_list.get(start_index, end_index),
@@ -200,14 +219,14 @@ class ClientHandlers:
 
             self.message_list.tag_add(hyperlink_tag, 'matchStart', 'matchEnd')
             self.message_list.tag_bind(hyperlink_tag, "<Button-1>", self._click)
-            self.message_list.tag_config(hyperlink_tag, font=self.general_font,
+            self.message_list.tag_config(hyperlink_tag, font=self._general_font,
                                          foreground=self.client_settings.system_color, underline=1)
             self.message_list.tag_bind(hyperlink_tag, "<Enter>", self._enter)
             self.message_list.tag_bind(hyperlink_tag, "<Leave>", self._leave)
             self.message_list.tag_bind(hyperlink_tag, "<Button-1>", self._click)
             loop_counter += 1
 
-    def tag_custom_font(self, tag_name, regex, remove_tag_name=None, remove_tag_first=False) -> None:
+    def _tag_custom_font(self, tag_name, regex, remove_tag_name=None, remove_tag_first=False) -> None:
         count = tkinter.IntVar()
         self.message_list.mark_set('matchStart', '1.0')
         self.message_list.mark_set('matchEnd', '1.0')
@@ -225,7 +244,7 @@ class ClientHandlers:
             self.message_list.tag_add(tag_name, 'matchStart', 'matchEnd')
 
     @staticmethod
-    def notification_formatted_message(client_id: str, message: str) -> str:
+    def _notification_formatted_message(client_id: str, message: str) -> str:
         notification_formatted_message = f'{client_id}: {message}'
         if len(message) > 58:
             notification_substr = notification_formatted_message[0:57]
@@ -233,7 +252,7 @@ class ClientHandlers:
         else:
             return notification_formatted_message
 
-    def delete_message(self, message: str) -> None:
+    def _delete_message(self, message: str) -> None:
         count = tkinter.IntVar()
         index = self.message_list.search(message, '1.0', stopindex='end', count=count)
         self.message_list.delete(index, "%s + %sc" % (index, count.get()))
@@ -241,53 +260,54 @@ class ClientHandlers:
     def message_list_push(self, client_id: str, client_profile: str, client_category: str,
                           message_time: str, message: str, message_type: str) -> None:
         formatted_message = f'| {client_id} ({message_time}) | {message}\n'
-        notification = self.notification_formatted_message(client_id, message)
+        notification = self._notification_formatted_message(client_id, message)
 
-        if client_profile == 'app':
+        if client_profile == self.get_application_profile_identifier():
             formatted_message = f'{message}\n'
-        if formatted_message.find(self.client_settings.SELF_DESTRUCT) != -1:
-            self_destruct_timer = Timer(60.0, self.delete_message, [formatted_message])
+        if formatted_message.find(self.client_settings.get_self_destruct()) != -1:
+            self_destruct_timer = Timer(60.0, self._delete_message, [formatted_message])
             self_destruct_timer.start()
-            self.timers.append(self_destruct_timer)
+            self._timers.append(self_destruct_timer)
 
         self.message_list.insert(tkinter.END, formatted_message)
-        self.tag_custom_font('Emoji', r'[\u263a-\U0001f645]')
-        self.tag_custom_font('Brackets', r'\[.*\]')
-        self.tag_custom_font('OtherUsersHandle', r'\|.*\|')
-        self.tag_custom_font('UserHandle', r'\| {}.*\|'.format(self.user_handle), 'OtherUsersHandle', True)
-        self.tag_custom_font('System', r'\~.*\~')
-        self.tag_hyperlinks()
+        self._tag_custom_font('Emoji', r'[\u263a-\U0001f645]')
+        self._tag_custom_font('Brackets', r'\[.*\]')
+        self._tag_custom_font('Other_Users_Handle', r'\|.*\|')
+        self._tag_custom_font('User_Handle', r'\| {}.*\|'.format(self._user_handle), 'Other_Users_Handle', True)
+        self._tag_custom_font('System', r'\~.*\~')
+        self._tag_hyperlinks()
         self.message_list.see('end')
 
-        if (message_type != 'local') and (formatted_message.find(f'| {self.user_handle} ({message_time}) |') < 0):
+        if (message_type != 'local') and (formatted_message.find(f'| {self._user_handle} ({message_time}) |') < 0):
             if self.client_settings.get_sound_alert_preference():
                 self.client_settings.set_sound_alert_preference(False)
                 sound_delayed_action = Timer(5.0, self.client_settings.set_sound_alert_preference, [True])
                 sound_delayed_action.start()
-                self.timers.append(sound_delayed_action)
-                if message.find(f'{self.client_settings.ALERT_COMMAND}') < 0:
-                    playsound(self.client_settings.MESSAGE_SOUND)
+                self._timers.append(sound_delayed_action)
+                if message.find(f'{self.client_settings.get_alert_command()}') < 0:
+                    playsound(self.client_settings.get_message_sound())
                 else:
-                    playsound(self.client_settings.USER_ALERT_SOUND)
+                    playsound(self.client_settings.get_user_alert_sound())
             if self.client_settings.get_notification_alert_preference():
                 self.client_settings.set_notification_alert_preference(False)
                 notification_delayed_action = Timer(5.0, self.client_settings.set_notification_alert_preference, [True])
                 notification_delayed_action.start()
-                self.timers.append(notification_delayed_action)
+                self._timers.append(notification_delayed_action)
                 if self.client_settings.get_current_platform() == 'Windows':
                     win_notify = self.client_settings.get_windows_notifier()
-                    win_notify.show_toast('wh00t', notification, threaded=True, duration=3)
+                    win_notify.show_toast(self.client_settings.get_app_title(), notification, threaded=True, duration=3)
                 elif self.client_settings.get_current_platform() == 'Linux':
                     lin_notify = self.client_settings.get_linux_notifier()
-                    lin_notify.update('wh00t', notification, self.client_settings.APP_ICON)
+                    lin_notify.update(self.client_settings.get_app_title(), notification,
+                                      self.client_settings.get_app_icon())
                     lin_notify.show()
 
     def close_timers(self):
-        for timer in self.timers:
+        for timer in self._timers:
             timer.cancel()
 
     @staticmethod
-    def print_help() -> str:
+    def _print_help() -> str:
         client_help = '\n'
         for item in HelpMenu:
             client_help += f'\n     {item}'
