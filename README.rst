@@ -80,6 +80,7 @@ gives the user feedback and help information.  The following commands can be use
 | ``/emojis`` : print list of top used emojis
 | ``/meme {memeName}`` : sends specific meme as a message. See /memes
 | ``/memes`` : prints out a list of available meme commands
+| ``/boom`` : a prefixing message command that marks the message it prefixes for 60 sec self destruction
 | ``/exit`` : exits program
 
 keyboard mappings
