@@ -9,9 +9,9 @@ python = '^3.8'
 python-dotenv = '^0.15.0'
 Pillow = '^7.2.0'
 emoji = '^0.6.0'
-playsound = '1.2.2'
+playsound = '^1.2.2'
 PyGObject = [{ version = '^3.36.1', platform = 'linux' }]
-wh00t-core = {git = 'https://github.com/roboto84/wh00t_core.git', tag = 'v0.2.2'}
+wh00t-core = {git = 'https://github.com/roboto84/wh00t_core.git', tag = 'v0.3.0'}
 
 [tool.poetry.dev-dependencies]
 pytest = '^5.2'

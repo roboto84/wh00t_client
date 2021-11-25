@@ -40,9 +40,9 @@ class Wh00tClientNetwork(ClientNetwork):
                     if self.chat_client_handlers.emoji_sentence_lock:
                         self.chat_client_handlers.emoji_message_handler(message)
                     elif ((len(message) != 0) and
-                          (message not in (self.client_settings.get_exit_string(),
+                          (message not in (self.client_settings.get_exit_command(),
                                            self.client_settings.get_alert_command())) and
-                          (message.find(self.client_settings.get_self_destruct()) == -1) and
+                          (message.find(self.client_settings.get_destruct_command()) == -1) and
                           (message[0] == '/') and
                           (message.count('/') == 1)):
                         if message.find('/meme ') >= 0:
@@ -52,7 +52,7 @@ class Wh00tClientNetwork(ClientNetwork):
                             self.chat_client_handlers.message_command_handler(message)
                     else:
                         super().send_message('chat_message', message)
-                        if message == self.client_settings.get_exit_string():
+                        if message == self.client_settings.get_exit_command():
                             self.close_app()
             except IOError as io_error:
                 self.logger.error(f'Received IOError: {(str(io_error))}')
@@ -88,15 +88,15 @@ class Wh00tClientNetwork(ClientNetwork):
     def received_message_handler(self, package: dict) -> bool:
         if not package:
             self.close_app()
-        elif package['message'] == self.client_settings.get_exit_string():
+        elif package['message'] == self.client_settings.get_exit_command():
             return False
         else:
             if (package['profile'] != self.chat_client_handlers.get_application_profile_identifier()) or \
-                    (package['id'] == self.client_settings.get_server_profile()
+                    (package['id'] == self.client_settings.get_server_id()
                      and (package['category'].find('debug') == -1)) \
                     or self.debug:
                 emoji_message = emoji.emojize(package['message'], use_aliases=True)
-                self.number_of_messages += 1
+                self._number_of_messages += 1
                 self.chat_client_handlers.message_list_push(package['id'], package['profile'], package['category'],
                                                             package['time'], emoji_message, 'network')
             return True

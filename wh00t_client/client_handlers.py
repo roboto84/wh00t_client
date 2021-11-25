@@ -34,7 +34,6 @@ class ClientHandlers:
         self._emoji_dict_keys: List[str] = list(Emojis.keys())
         self._emoji_paging_index: int = 0
         self._hyperlink_tag_prefix: str = 'hyper-'
-        self._application_profile_identifier: str = 'app'
         self._internal_client_category: str = 'internal_message'
 
         self.emoji_sentence_lock: bool = False
@@ -55,7 +54,7 @@ class ClientHandlers:
         self.message_list.tag_configure('System', font=self._general_font, foreground=client_settings.system_color)
 
     def get_application_profile_identifier(self):
-        return self._application_profile_identifier
+        return self.client_settings.get_app_profile()
 
     def get_internal_client_category(self):
         return self._internal_client_category
@@ -158,7 +157,7 @@ class ClientHandlers:
                 self.chat_message.set(self._message_cache)
                 self.emoji_sentence_lock = False
             else:
-                self.chat_message.set(self.client_settings.get_exit_string())
+                self.chat_message.set(self.client_settings.get_exit_command())
             self.message_input_field.icursor(len(self.chat_message.get()))
         elif event.keysym == 'Up':
             if self._message_history_index < 0:
@@ -264,7 +263,7 @@ class ClientHandlers:
 
         if client_profile == self.get_application_profile_identifier():
             formatted_message = f'{message}\n'
-        if formatted_message.find(self.client_settings.get_self_destruct()) != -1:
+        if formatted_message.find(self.client_settings.get_destruct_command()) != -1:
             self_destruct_timer = Timer(60.0, self._delete_message, [formatted_message])
             self_destruct_timer.start()
             self._timers.append(self_destruct_timer)

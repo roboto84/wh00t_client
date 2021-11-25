@@ -150,7 +150,7 @@ class Wh00tClient(tk.Tk):
             self._clean_up()
             os._exit(1)
         else:
-            chat_message.set(self._wh00t_client_settings.get_exit_string())
+            chat_message.set(self._wh00t_client_settings.get_exit_command())
             self._wh00t_client_network.send_wh00t_message()
 
 

@@ -8,6 +8,7 @@ from typing import Tuple
 from datetime import datetime
 from bin.themes import BaseTheme
 from __init__ import __version__
+from wh00t_core.library.network_commons import NetworkCommons
 
 
 class ClientSettings:
@@ -20,10 +21,7 @@ class ClientSettings:
     _MESSAGE_SOUND: str = os.path.join(_HOME_PATH, 'assets/audio/wh00t7.wav')
     _USER_ALERT_SOUND: str = os.path.join(_HOME_PATH, 'assets/audio/AORiver.wav')
     _ALERT_COMMAND: str = '/ao'
-    _EXIT_STRING: str = '/exit'
-    _SELF_DESTRUCT: str = '/boom'
-    _CLIENT_PROFILE: str = 'user'
-    _SERVER_PROFILE: str = 'wh00t_server'
+    _network_commons: NetworkCommons = NetworkCommons()
 
     def __init__(self, client_user_name: str, host: str, port: int):
         self.client_id: str = client_user_name
@@ -144,17 +142,20 @@ class ClientSettings:
     def get_alert_command(self):
         return self._ALERT_COMMAND
 
-    def get_exit_string(self):
-        return self._EXIT_STRING
+    def get_exit_command(self):
+        return self._network_commons.get_exit_command()
 
-    def get_self_destruct(self):
-        return self._SELF_DESTRUCT
+    def get_destruct_command(self):
+        return self._network_commons.get_destruct_command()
+
+    def get_app_profile(self):
+        return self._network_commons.get_app_profile()
 
     def get_client_profile(self):
-        return self._CLIENT_PROFILE
+        return self._network_commons.get_user_profile()
 
-    def get_server_profile(self):
-        return self._SERVER_PROFILE
+    def get_server_id(self):
+        return self._network_commons.get_server_id()
 
     @staticmethod
     def message_time() -> str:
