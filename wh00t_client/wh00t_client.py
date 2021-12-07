@@ -10,18 +10,19 @@ import webbrowser
 from PIL import ImageTk, Image
 from dotenv import load_dotenv
 from client_settings import ClientSettings
-from wh00t_client_network import Wh00tClientNetwork
-from client_handlers import ClientHandlers
-from meme_collection import MemeCollection
+from bin.network.wh00t_client_network import Wh00tClientNetwork
+from bin.message.message_history_handler import MessageHistoryHandler
+from bin.message.message_handler import MessageHandler
+from bin.client.client_helpers import ClientHelpers
+from bin.emoji.emoji_handler import EmojiHandler
 
 
 class Wh00tClient(tk.Tk):
-    def __init__(self, logging_object: logging, client_user_name: str, server_address: str, server_port: int,
-                 debug_switch: bool):
+    def __init__(self, logging_object: logging, client_user_name: str, server_address: str,
+                 server_port: int, debug_switch: bool):
         super().__init__()
         self._debug: bool = debug_switch
         self._wh00t_client_settings: ClientSettings = ClientSettings(client_user_name, server_address, server_port)
-        self._wh00t_client_meme_collection: MemeCollection = MemeCollection()
 
         # Declare window elements
         self.geometry('{}x{}'.format(
@@ -100,23 +101,28 @@ class Wh00tClient(tk.Tk):
             highlightcolor=self._wh00t_client_settings.highlight_color
         )
 
-        self._wh00t_client_handlers: ClientHandlers = ClientHandlers(
-            logging_object, self._wh00t_client_settings,
-            self._wh00t_client_meme_collection, chat_message,
-            message_input_field, message_list
+        self._wh00t_emoji_handler: EmojiHandler = EmojiHandler(chat_message, message_input_field)
+
+        self._wh00t_message_history_handler: MessageHistoryHandler = MessageHistoryHandler(
+            logging_object, self._wh00t_client_settings, self._wh00t_emoji_handler,
+            chat_message, message_input_field, message_list
+        )
+        self._wh00t_message_handler: MessageHandler = MessageHandler(
+            logging_object, self._wh00t_client_settings, message_list
         )
         self._wh00t_client_network: Wh00tClientNetwork = Wh00tClientNetwork(
-            logging_object, self._wh00t_client_settings, chat_message,
-            self._wh00t_client_handlers, self._close_app, self._debug
+            logging_object, self._wh00t_client_settings, chat_message, self._wh00t_message_history_handler,
+            self._wh00t_message_handler, self._close_app, self._debug
         )
+        self._wh00t_client_helper: ClientHelpers = ClientHelpers(logging_object, self._wh00t_client_settings)
 
         # Set initial element properties.
         self.title(self._wh00t_client_settings.get_app_title())
         self.protocol('WM_DELETE_WINDOW', lambda: self._on_window_close(chat_message))
         chat_message.set('')
         banner.bind("<1>", lambda e: webbrowser.open('https://github.com/roboto84/wh00t_client'))
-        message_list.bind('<Key>', lambda e: self._wh00t_client_handlers.message_list_event_handler(e))
-        message_input_field.bind('<Key>', lambda e: self._wh00t_client_handlers.message_entry_event_handler(e))
+        message_list.bind('<Key>', lambda e: self._wh00t_message_history_handler.message_list_event_handler(e))
+        message_input_field.bind('<Key>', lambda e: self._wh00t_message_history_handler.message_entry_event_handler(e))
         message_input_field.bind('<Return>', lambda e: self._wh00t_client_network.send_wh00t_message())
         message_input_field.focus()
 
@@ -130,16 +136,16 @@ class Wh00tClient(tk.Tk):
 
         # Initialize and Run App
         self._wh00t_client_network.sock_it()
-        self._wh00t_client_handlers.thread_it(self._wh00t_client_network.receive_wh00t_message)
+        self._wh00t_client_helper.thread_it(self._wh00t_client_network.receive_wh00t_message)
         self.mainloop()
 
     def _clean_up(self) -> None:
-        self._wh00t_client_handlers.close_timers()
-        self._wh00t_client_handlers.close_notify()
+        self._wh00t_message_handler.close_timers()
+        self._wh00t_client_helper.close_notify()
         self._wh00t_client_network.close_it()
 
     def _close_app(self) -> None:
-        if self._wh00t_client_handlers.receive_thread.is_alive():
+        if self._wh00t_client_helper.receive_thread.is_alive():
             self.after(50, self._close_app)
         else:
             self._clean_up()

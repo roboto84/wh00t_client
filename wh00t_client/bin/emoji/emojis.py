@@ -1,4 +1,3 @@
-# Chat Client Emojis Supported by Paging
 
 Emojis = {
     ':smile_cat:': '😸',

@@ -6,7 +6,7 @@ import time
 import platform
 from typing import Tuple
 from datetime import datetime
-from bin.themes import BaseTheme
+from bin.themes.themes import BaseTheme
 from __init__ import __version__
 from wh00t_core.library.network_commons import NetworkCommons
 
