@@ -77,7 +77,15 @@ class MessageHandler:
         multi = (any(command in message for command in list(self._client_commands.get_multi_word_commands().keys())))
         return sys or multi
 
+    @staticmethod
+    def command_message_formatter(feedback: str) -> str:
+        return f'\n\n   {feedback}\n'
+
     def message_command_handler(self, message: str) -> Optional[List[str]]:
+        notification: str = 'Notifications'
+        s_alerts: str = 'Sound alerts'
+        off: str = 'OFF'
+        on: str = 'ON'
         if message == '/memes':
             self._command_message_list_push(self._meme_collection.print_memes_help())
         elif '/meme' in message:
@@ -85,14 +93,19 @@ class MessageHandler:
             return self._meme_collection.meme(split_message[1].replace(' ', ''))
         elif message == '/noSound':
             self._client_settings.set_sound_alert_preference(False)
+            self._command_message_list_push(self.command_message_formatter(f'{s_alerts} {off}'))
         elif message == '/sound':
             self._client_settings.set_sound_alert_preference(True)
+            self._command_message_list_push(self.command_message_formatter(f'{s_alerts} {on}'))
         elif message == '/noNotification':
             self._client_settings.set_notification_alert_preference(False)
+            self._command_message_list_push(self.command_message_formatter(f'{notification} {off}'))
         elif message == '/notify':
             self._client_settings.set_notification_alert_preference(True)
+            self._command_message_list_push(self.command_message_formatter(f'{notification} {on}'))
         elif message == '/version':
-            self._command_message_list_push(f'\n     wh00t client v{self._client_settings.get_client_version()}\n')
+            self._command_message_list_push(
+                self.command_message_formatter(f'wh00t client v{self._client_settings.get_client_version()}'))
         elif message == '/help':
             self._command_message_list_push(self._client_commands.print_help())
         elif message == '/emojis':
