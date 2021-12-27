@@ -45,13 +45,14 @@ class Wh00tClientNetwork(ClientNetwork):
                         else:
                             self._chat_message_handler.message_command_handler(message)
                     else:
-                        super().send_message('chat_message', message)
+                        super().send_message('chat_message', message, self._client_settings.client_user_name)
                         if message == self._client_settings.get_exit_command():
                             self._close_app()
             except IOError as io_error:
                 self._logger.error(f'Received IOError: {(str(io_error))}')
                 self._chat_message_handler.message_list_push(
                     self._client_settings.client_id,
+                    self._client_settings.client_user_name,
                     self._chat_message_handler.get_application_profile_identifier(),
                     self._chat_message_handler.get_internal_client_category(),
                     self._client_settings.message_time(),
@@ -63,7 +64,7 @@ class Wh00tClientNetwork(ClientNetwork):
     def multi_wh00t_message(self, client_category: str, ascii_array: List[str]):
         try:
             for artLine in ascii_array:
-                super().send_message(client_category, artLine)
+                super().send_message(client_category, artLine, self._client_settings.client_user_name)
         except TypeError as type_error:
             self._logger.error(f'Received IOError: {(str(type_error))}')
 
@@ -74,6 +75,7 @@ class Wh00tClientNetwork(ClientNetwork):
             self._logger.error(f'Received SyntaxError: {str(syntax_error)}')
             self._chat_message_handler.message_list_push(
                 self._client_settings.client_id,
+                self._client_settings.client_user_name,
                 self._chat_message_handler.get_application_profile_identifier(),
                 self._chat_message_handler.get_internal_client_category(),
                 self._client_settings.message_time(),
@@ -98,6 +100,7 @@ class Wh00tClientNetwork(ClientNetwork):
             if self._accept_message_comparator(package):
                 emoji_message = emoji.emojize(package['message'], use_aliases=True)
                 self._number_of_messages += 1
-                self._chat_message_handler.message_list_push(package['id'], package['profile'], package['category'],
-                                                             package['time'], emoji_message, 'network')
+                self._chat_message_handler.message_list_push(package['id'], package['username'], package['profile'],
+                                                             package['category'], package['time'], emoji_message,
+                                                             'network')
             return True

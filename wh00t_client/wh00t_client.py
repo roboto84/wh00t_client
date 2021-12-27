@@ -21,6 +21,8 @@ class Wh00tClient(tk.Tk):
     def __init__(self, logging_object: logging, client_user_name: str, server_address: str,
                  server_port: int, debug_switch: bool):
         super().__init__()
+        self._logger: logging.Logger = logging_object.getLogger(type(self).__name__)
+        self._logger.setLevel(logging_object.INFO)
         self._debug: bool = debug_switch
         self._wh00t_client_settings: ClientSettings = ClientSettings(client_user_name, server_address, server_port)
 
@@ -135,9 +137,14 @@ class Wh00tClient(tk.Tk):
         send_message_button.grid(row=2, column=2, pady=10)
 
         # Initialize and Run App
-        self._wh00t_client_network.sock_it()
-        self._wh00t_client_helper.thread_it(self._wh00t_client_network.receive_wh00t_message)
-        self.mainloop()
+        try:
+            self._wh00t_client_network.sock_it()
+            self._wh00t_client_helper.thread_it(self._wh00t_client_network.receive_wh00t_message)
+            self.mainloop()
+        except KeyboardInterrupt:
+            self._logger.warning('Received a KeyboardInterrupt... now exiting')
+            self._clean_up()
+            os._exit(1)
 
     def _clean_up(self) -> None:
         self._wh00t_message_handler.close_timers()

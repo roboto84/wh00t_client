@@ -24,7 +24,8 @@ class ClientSettings:
     _network_commons: NetworkCommons = NetworkCommons()
 
     def __init__(self, client_user_name: str, host: str, port: int):
-        self.client_id: str = client_user_name
+        self.client_id: str = 'wh00t_client'
+        self.client_user_name: str = client_user_name
         self.server_address: Tuple = (host, port)
         self.sound_alert_preference: bool = True
         self.notification_alert_preference: bool = True

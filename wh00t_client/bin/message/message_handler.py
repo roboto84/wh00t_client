@@ -58,9 +58,9 @@ class MessageHandler:
         self._message_list.delete(index, "%s + %sc" % (index, count.get()))
 
     def _command_message_list_push(self, message: str):
-        self.message_list_push(self._client_settings.get_app_title(), self.get_application_profile_identifier(),
-                               self.get_internal_client_category(), self._client_settings.message_time(),
-                               message, 'local')
+        self.message_list_push(self._client_settings.get_app_title(), self._client_settings.client_user_name,
+                               self.get_application_profile_identifier(), self.get_internal_client_category(),
+                               self._client_settings.message_time(), message, 'local')
 
     def get_application_profile_identifier(self):
         return self._client_settings.get_app_profile()
@@ -190,10 +190,10 @@ class MessageHandler:
                               self._client_settings.get_app_icon())
             lin_notify.show()
 
-    def message_list_push(self, client_id: str, client_profile: str, client_category: str,
+    def message_list_push(self, client_id: str, username: str, client_profile: str, client_category: str,
                           message_time: str, message: str, message_type: str) -> None:
-        user_handle: str = self._client_settings.client_id
-        formatted_message: str = f'| {client_id} ({message_time}) | {message}\n'
+        user_handle: str = self._client_settings.client_user_name
+        formatted_message: str = f'| {username} ({message_time}) | {message}\n'
         message_is_secret: bool = self._client_settings.get_destruct_command() in formatted_message
 
         if client_id == self._client_settings.get_server_id():
@@ -216,5 +216,4 @@ class MessageHandler:
             if self._client_settings.get_sound_alert_preference():
                 self._play_sound_on_message(message)
             if not message_is_secret and self._client_settings.get_notification_alert_preference():
-                self._notify_on_message(client_id, message)
-
+                self._notify_on_message(username, message)
