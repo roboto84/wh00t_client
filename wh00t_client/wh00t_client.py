@@ -138,7 +138,7 @@ class Wh00tClient(tk.Tk):
 
         # Initialize and Run App
         try:
-            self._wh00t_client_network.sock_it()
+            self._wh00t_client_network.sock_it(self._wh00t_client_settings.client_user_name)
             self._wh00t_client_helper.thread_it(self._wh00t_client_network.receive_wh00t_message)
             self.mainloop()
         except KeyboardInterrupt:
