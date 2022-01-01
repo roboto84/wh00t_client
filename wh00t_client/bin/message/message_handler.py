@@ -1,4 +1,3 @@
-
 import tkinter
 import tkinter.font
 import webbrowser
@@ -198,6 +197,10 @@ class MessageHandler:
 
         if client_id == self._client_settings.get_server_id():
             formatted_message = f'{message}\n'
+        elif client_id == 'roboto_api' and client_category == 'chat_message' and \
+                (message.find(f'{username} has connected at') > -1 or
+                 message.find(f'{username} has left the chat at') > -1):
+            formatted_message: str = f'~ {message} ~\n'
         if message_is_secret:
             self_destruct_timer = Timer(60.0, self._delete_message, [formatted_message])
             self_destruct_timer.start()
