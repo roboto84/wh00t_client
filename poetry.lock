@@ -166,7 +166,7 @@ python-versions = "*"
 
 [[package]]
 name = "wh00t-core"
-version = "0.4.0"
+version = "0.4.1"
 description = 'Core libraries shared amongst the wh00t connected projects'
 category = "main"
 optional = false
@@ -177,7 +177,7 @@ develop = false
 type = "git"
 url = 'https://github.com/roboto84/wh00t_core.git'
 reference = 'v0.4.1'
-resolved_reference = "66ba63eec4be0d274b2e964408b5d3f688bda879"
+resolved_reference = "c123c96c5f2e87f9a2c3ec870dcb5d71036135ac"
 
 [metadata]
 lock-version = "1.1"
