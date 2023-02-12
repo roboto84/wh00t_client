@@ -4,7 +4,7 @@ import ntpath
 import os
 import time
 import platform
-from typing import Tuple
+from typing import Tuple, Literal
 from datetime import datetime
 from bin.themes.themes import BaseTheme
 from __init__ import __version__
@@ -69,7 +69,7 @@ class ClientSettings:
             self.message_submit_button_width: int = 8
             self.message_submit_button_pad_y: int = 4
             self.message_list_border_dimension: int = 2
-            self.message_submit_button_relief: str = 'ridge'
+            self.message_submit_button_relief: Literal['ridge'] = 'ridge'
 
         elif self._CURRENT_PLATFORM == 'Linux':
             import gi
@@ -96,7 +96,7 @@ class ClientSettings:
             self.message_submit_button_width: int = 8
             self.message_submit_button_pad_y: int = 4
             self.message_list_border_dimension: int = 0
-            self.message_submit_button_relief: str = 'flat'
+            self.message_submit_button_relief: Literal['flat'] = 'flat'
 
     def get_server_address(self) -> Tuple:
         return self.server_address

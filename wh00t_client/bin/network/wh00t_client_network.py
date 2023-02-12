@@ -39,7 +39,7 @@ class Wh00tClientNetwork(ClientNetwork):
                     if self._chat_history_handler.get_emoji_sentence_lock():
                         self._chat_history_handler.emoji_message_handler(message)
                     elif self._chat_message_handler.message_command_comparator(message):
-                        if '/meme' in message:
+                        if '/meme' in message and '/memes' not in message:
                             self.multi_wh00t_message('meme_message',
                                                      self._chat_message_handler.message_command_handler(message))
                         else:
@@ -98,7 +98,7 @@ class Wh00tClientNetwork(ClientNetwork):
             return False
         else:
             if self._accept_message_comparator(package):
-                emoji_message = emoji.emojize(package['message'], use_aliases=True)
+                emoji_message = emoji.emojize(package['message'], language='alias')
                 self._number_of_messages += 1
                 self._chat_message_handler.message_list_push(package['id'], package['username'], package['profile'],
                                                              package['category'], package['time'], emoji_message,

@@ -18,5 +18,5 @@ class MemeCollection:
     def print_memes_help(self) -> str:
         client_memes: str = '\n'
         for meme_text in self._supported_ascii_memes.keys():
-            client_memes += f'\n     /meme - {self._supported_ascii_memes[meme_text]["help_text"]}'
+            client_memes += f'\n     /meme {meme_text} - {self._supported_ascii_memes[meme_text]["help_text"]}'
         return f'{client_memes}\n'
