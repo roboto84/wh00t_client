@@ -4,13 +4,14 @@ import webbrowser
 import logging
 from typing import Optional, List
 from threading import Timer
-from playsound import playsound
 from bin.memes.meme_collection import MemeCollection
 from client_settings import ClientSettings
 from bin.client.client_helpers import ClientHelpers
 from bin.client.client_commands import ClientCommands
 from bin.emoji.emoji_handler import EmojiHandler
 
+# playsound doesn't support pep517 because it doesn't support project.toml
+# from playsound import playsound
 
 class MessageHandler:
     def __init__(self, logging_object: logging, client_settings: ClientSettings, message_list: tkinter.Text):
@@ -156,21 +157,22 @@ class MessageHandler:
             self._message_list.tag_add(hyperlink_tag, 'matchStart', 'matchEnd')
             self._message_list.tag_bind(hyperlink_tag, "<Button-1>", self._click)
             self._message_list.tag_config(hyperlink_tag, font=self._general_font,
-                                          foreground=self._client_settings.system_color, underline=1)
+                                          foreground=self._client_settings.system_color, underline=True)
             self._message_list.tag_bind(hyperlink_tag, "<Enter>", self._enter)
             self._message_list.tag_bind(hyperlink_tag, "<Leave>", self._leave)
             self._message_list.tag_bind(hyperlink_tag, "<Button-1>", self._click)
             loop_counter += 1
 
-    def _play_sound_on_message(self, message: str):
-        self._client_settings.set_sound_alert_preference(False)
-        sound_delayed_action = Timer(5.0, self._client_settings.set_sound_alert_preference, [True])
-        sound_delayed_action.start()
-        self._timers.append(sound_delayed_action)
-        if self._client_settings.get_alert_command() in message:
-            playsound(self._client_settings.get_user_alert_sound())
-        else:
-            playsound(self._client_settings.get_message_sound())
+    # playsound library not supporting pep517.  Need time to look for another sound library
+    # def _play_sound_on_message(self, message: str):
+    #     self._client_settings.set_sound_alert_preference(False)
+    #     sound_delayed_action = Timer(5.0, self._client_settings.set_sound_alert_preference, [True])
+    #     sound_delayed_action.start()
+    #     self._timers.append(sound_delayed_action)
+    #     if self._client_settings.get_alert_command() in message:
+    #         playsound(self._client_settings.get_user_alert_sound())
+    #     else:
+    #         playsound(self._client_settings.get_message_sound())
 
     def _notify_on_message(self, client_id: str, message: str):
         notification = ClientHelpers.notification_formatted_message(client_id, message)
@@ -216,7 +218,9 @@ class MessageHandler:
         self._message_list.see('end')
 
         if (message_type != 'local') and (f'| {user_handle} ({message_time}) |' not in formatted_message):
-            if self._client_settings.get_sound_alert_preference():
-                self._play_sound_on_message(message)
+
+            # if self._client_settings.get_sound_alert_preference():
+            #     self._play_sound_on_message(message)
+
             if not message_is_secret and self._client_settings.get_notification_alert_preference():
                 self._notify_on_message(username, message)
